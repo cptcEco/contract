@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// todo update license
 pragma solidity ^0.8.5;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -9,8 +11,7 @@ contract Hub is Ownable{
 
     event ContractsChanged();
 
-    function setContractAddress(string contractName, address newContractAddress,uint256 authorisation)
-    public onlyOwner {
+    function setContractAddress(string memory contractName, address newContractAddress, uint256 authorisation) external onlyOwner {
         bytes32 index = keccak256(abi.encodePacked(contractName));
 
         if(contractAddress[index] != address(0)) {
@@ -26,7 +27,7 @@ contract Hub is Ownable{
         emit ContractsChanged();
     }
 
-    function getContractAddress(string contractName)  public view returns(address selectedContractAddress) {
+    function getContractAddress(string memory contractName)  public view returns(address) {
         bytes32 index = keccak256(abi.encodePacked(contractName));
         return contractAddress[index];
     }

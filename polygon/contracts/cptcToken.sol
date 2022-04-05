@@ -1,10 +1,11 @@
-
+// SPDX-License-Identifier: MIT
+// todo update license
 pragma solidity ^0.8.5;
  
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import {Hub} from "./Hub.sol";
+import {Hub} from "./hub.sol";
  
 contract CPTCToken is ERC20, Ownable {
 
@@ -14,11 +15,11 @@ contract CPTCToken is ERC20, Ownable {
  
     // todo add addresses that will receive initial mint tokens
     constructor(address hubAddress, address mintAddress) ERC20("Cultural Places Token Contract", "CPTC") {
-        require(hubAddress!=0x0);
-		require(mintAddress!=0x0);
+        require(hubAddress != address(0), "Hub address not specified");
+		require(mintAddress != address(0), "Mint address not specified");
         hub = Hub(hubAddress);
 
-        _mint(initialMintAddress, initialMintVolume);
+        _mint(mintAddress, initialMintVolume);
     }
 
     function setHubAddress(address newHubAddress) public onlyOwner {
