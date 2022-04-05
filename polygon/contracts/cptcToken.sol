@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.5;
  
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Hub} from "./Hub.sol";
  
 contract CPTCToken is ERC20 {
     address public admin;
+    
+    Hub public hub;
  
     constructor() ERC20("Cultural Places Token Contract", "CPTC") {
         _mint(msg.sender, 500 * 10 ** 18);
