@@ -2,28 +2,47 @@
 pragma solidity ^0.8.5;
  
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 import {Hub} from "./Hub.sol";
  
-contract CPTCToken is ERC20 {
-    address public admin;
-    
+contract CPTCToken is ERC20, Ownable {
+
+    uint256 public constant initialMintVolume = 5e25; // 50 000 000
+
     Hub public hub;
  
-    constructor() ERC20("Cultural Places Token Contract", "CPTC") {
-        _mint(msg.sender, 500 * 10 ** 18);
-        admin = msg.sender;
+    // todo add addresses that will receive initial mint tokens
+    constructor(address hubAddress, address mintAddress) ERC20("Cultural Places Token Contract", "CPTC") {
+        require(hubAddress!=0x0);
+		require(mintAddress!=0x0);
+        hub = Hub(hubAddress);
+
+        _mint(initialMintAddress, initialMintVolume);
+    }
+
+    function setHubAddress(address newHubAddress) public onlyOwner {
+        hub = Hub(newHubAddress);
+    }
+
+    modifier allowedToMint(address account) {
+        // get authorisation mask from hub
+        require (hub.getContractAuthorisation(account) == 1 || hub.getContractAuthorisation(account) == 3, "Bad authorisation rights for minting");
+        _ ;
+    }
+
+    modifier allowedToBurn(address account) {
+        // get authorisation mask from hub
+        require (hub.getContractAuthorisation(account) == 2 || hub.getContractAuthorisation(account) == 3, "Bad authorisation rights for burning");
+        _ ;
     }
  
-    function mint(address to, uint amounts) external returns(bool) {
-        // Only the contract owner have the right to mint
-        require(msg.sender == admin, "Only admin is allowed to mint");
-        // addess and amount should have the same length
-       // require(to.length == amounts.length, 'senders array and amounts array are not equal');
+    function mint(address to, uint amounts) external allowedToMint(msg.sender) returns(bool) {
         _mint(to, amounts);
         return true;
     }
  
-    function burn(uint amount) external {
+    function burn(uint amount) external allowedToBurn(msg.sender){
        //  User burner should own what he wants to burn
        require((balanceOf(msg.sender) > amount), "You can't burn more than you own");
        _burn(msg.sender, amount);
@@ -32,17 +51,5 @@ contract CPTCToken is ERC20 {
     function balance(address add) view public returns (uint256) {
         return balanceOf(add);
     }
- 
-    //     function mintMany(address[] addresses, uint[] amounts) public returns (bool success) {
-    //     // addess and amount should have the same length
-    //     require(addresses.length == amounts.length, "senders array and amounts array are not equal");
-    //     // loop on the array and send money for each one
-    //     for( uint256 i=0;i < addresses.length; i++){
-    //         balance(admin) -= amounts[i];
-    //         balance(addresses[i]) += amounts[i];
-    //         _transfer(admin, addresses[i], amounts[i]);
-    //     }
-    //     return true;
-    // }
 }
 

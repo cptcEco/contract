@@ -1,62 +1,26 @@
 pragma solidity ^0.8.5;
 
-/**
-* @title Ownable
-* @dev The Ownable contract has an owner address, and provides basic authorization control
-* functions, this simplifies the implementation of "user permissions".
-*/
-contract Ownable {
-    address public owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-    * account.
-    */
-    constructor () public {
-        owner = msg.sender;
-    }
-
-    /**
-    * @dev Throws if called by any account other than the owner.
-    */
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only contract owner can call this function");
-        _;
-    }
-
-    /**
-    * @dev Allows the current owner to transfer control of the contract to a newOwner.
-    * @param newOwner The address to transfer ownership to.
-    */
-    function transferOwnership(address newOwner) public onlyOwner {
-        require(newOwner != address(0));
-        emit OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-    }
-
-}
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Hub is Ownable{
+
     mapping(bytes32 => address) contractAddress;
-    mapping(address => bool) contractList;
-    mapping(address => bool) contractAuthority;
+    mapping(address => uint256) contractAuthorisationList; // 1 - allowed to mint, 2 - allowed to burn, 3 - allowed to mint and burn
 
     event ContractsChanged();
 
-    function setContractAddress(string contractName, address newContractAddress, bitmap_mint_burn)
+    function setContractAddress(string contractName, address newContractAddress,uint256 authorisation)
     public onlyOwner {
         bytes32 index = keccak256(abi.encodePacked(contractName));
 
         if(contractAddress[index] != address(0)) {
             address oldContractAddress = contractAddress[index];
-            contractList[oldContractAddress] = false;
+            contractAuthorisationList[oldContractAddress] = 0;
         }
         contractAddress[index] = newContractAddress;
 
         if(newContractAddress != address(0)){
-            contractList[newContractAddress] = true;
+            contractAuthorisationList[newContractAddress] = authorisation;
         }
 
         emit ContractsChanged();
@@ -66,9 +30,9 @@ contract Hub is Ownable{
         bytes32 index = keccak256(abi.encodePacked(contractName));
         return contractAddress[index];
     }
-    
-    function isContract(address selectedContractAddress) public view returns (bool) {
-        return contractList[selectedContractAddress];
+
+    function getContractAuthorisation(address selectedContractAddress) public view returns (uint256) {
+        return contractAuthorisationList[selectedContractAddress];
     }
 }
 
