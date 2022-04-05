@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.5;
  
@@ -30,16 +31,16 @@ contract CPTCToken is ERC20 {
         return balanceOf(add);
     }
  
-        function mintMany(address[] addresses, uint[] amounts) public returns (bool success) {
-        // addess and amount should have the same length
-        require(addresses.length == amounts.length, "senders array and amounts array are not equal");
-        // loop on the array and send money for each one
-        for( uint256 i=0;i < addresses.length; i++){
-            balance(admin) -= amounts[i];
-            balance(addresses[i]) += amounts[i];
-            _transfer(admin, addresses[i], amounts[i]);
-        }
-        return true;
-    }
+    //     function mintMany(address[] addresses, uint[] amounts) public returns (bool success) {
+    //     // addess and amount should have the same length
+    //     require(addresses.length == amounts.length, "senders array and amounts array are not equal");
+    //     // loop on the array and send money for each one
+    //     for( uint256 i=0;i < addresses.length; i++){
+    //         balance(admin) -= amounts[i];
+    //         balance(addresses[i]) += amounts[i];
+    //         _transfer(admin, addresses[i], amounts[i]);
+    //     }
+    //     return true;
+    // }
 }
 

@@ -4,5 +4,8 @@
   "private": true,
   "dependencies": {
     "truffle-hdwallet-provider": "^1.0.17"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.5.0"
   }
 }
