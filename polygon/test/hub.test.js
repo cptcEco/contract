@@ -1,6 +1,6 @@
 const BN = require('bn.js');
 const { assert } = require('chai');
-const {expectRevert, expectEvent} = require('@openzeppelin/test-helpers');
+const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 
 var CptcHub = artifacts.require('CptcHub');
 var CptcToken = artifacts.require('CptcToken');
@@ -16,27 +16,25 @@ contract('Hub contract testing', async (accounts) => {
     });
 
     it('Owner is allowed to call set contract address', async () => {
-        await expectRevert(hub.setContractAddress('testContract', accounts[2], 2, {from: accounts[5]}), 'Ownable: caller is not the owner');
-        const receipt = await hub.setContractAddress('testContract', accounts[2], 2, {from: accounts[0]});
+        await expectRevert(hub.setContractAddress('testContract', accounts[2], 2, { from: accounts[5] }), 'Ownable: caller is not the owner');
+        const receipt = await hub.setContractAddress('testContract', accounts[2], 2, { from: accounts[0] });
         expectEvent(receipt, 'ContractsChanged');
     });
 
-    it('Set contract address with permission 1, 2 and 3', async () => {
-        for (let i = 1; i <= 3; i++) {
-            const contractName = `Test${i}Contract`;
-            const authorisationCode = i;
+    it('Set contract address with permission 1', async () => {
+        const contractName = `Test1Contract`;
+        const authorisationCode = 1;
 
-            await hub.setContractAddress(contractName, accounts[3], authorisationCode, {from: accounts[0]});
+        await hub.setContractAddress(contractName, accounts[3], authorisationCode, { from: accounts[0] });
 
-            const authorisation = await hub.getContractAuthorisation(accounts[3]);
-            assert.equal(authorisation.toNumber(), authorisationCode, `Authorisation code expected to be ${authorisationCode}`);
-        }
+        const authorisation = await hub.getContractAuthorisation(accounts[3]);
+        assert.equal(authorisation.toNumber(), authorisationCode, `Authorisation code expected to be ${authorisationCode}`);
     });
 
     it('Update contract permission from 1 to 2', async () => {
         const contractName = `ChangeContractPermission`;
-        await hub.setContractAddress(contractName, accounts[3], 1, {from: accounts[0]});
-        await hub.setContractAddress(contractName, accounts[3], 2, {from: accounts[0]});
+        await hub.setContractAddress(contractName, accounts[3], 1, { from: accounts[0] });
+        await hub.setContractAddress(contractName, accounts[3], 2, { from: accounts[0] });
 
         const authorisation = await hub.getContractAuthorisation(accounts[3]);
         assert.equal(authorisation.toNumber(), 2, 'Authorisation code expected to be 2');
@@ -44,8 +42,8 @@ contract('Hub contract testing', async (accounts) => {
 
     it('Change contract address, old contract address have permission 0', async () => {
         const contractName = `ChangeContractAddress`;
-        await hub.setContractAddress(contractName, accounts[3], 1, {from: accounts[0]});
-        await hub.setContractAddress(contractName, accounts[4], 1, {from: accounts[0]});
+        await hub.setContractAddress(contractName, accounts[3], 1, { from: accounts[0] });
+        await hub.setContractAddress(contractName, accounts[4], 1, { from: accounts[0] });
 
         const authorisation = await hub.getContractAuthorisation(accounts[3]);
         assert.equal(authorisation.toNumber(), 0, 'Authorisation code expected to be 0');

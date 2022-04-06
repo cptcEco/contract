@@ -16,7 +16,7 @@ contract('Token contract testing', async (accounts) => {
 
     it('Should have initial mint tokens', async () => {
         const initialMintRaw = await token.balanceOf(accounts[1]);
-        
+
         assert.equal(initialMintRaw.toString(), '50000000000000000000000000', 'Initial mint value should be 50 mil tokens');
     });
 
