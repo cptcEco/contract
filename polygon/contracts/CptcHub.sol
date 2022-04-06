@@ -4,7 +4,7 @@ pragma solidity ^0.8.5;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Hub is Ownable{
+contract CptcHub is Ownable{
 
     mapping(bytes32 => address) contractAddress;
     mapping(address => uint256) contractAuthorisationList; // 1 - allowed to mint, 2 - allowed to burn, 3 - allowed to mint and burn

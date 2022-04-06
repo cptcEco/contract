@@ -2,10 +2,16 @@
   "name": "blockchain-ethereum-template",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "truffle:test:polygon": "cd polygon && truffle test --network test"
+  },
   "dependencies": {
+    "bn": "^1.0.5",
+    "chai": "^4.3.6",
     "truffle-hdwallet-provider": "^1.0.17"
   },
   "devDependencies": {
-    "@openzeppelin/contracts": "^4.5.0"
+    "@openzeppelin/contracts": "^4.5.0",
+    "@openzeppelin/test-helpers": "^0.5.15"
   }
 }
