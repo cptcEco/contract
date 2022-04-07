@@ -43,10 +43,9 @@ contract CPTCToken is ERC20, Ownable {
         return true;
     }
  
-    function burn(uint amount) external allowedToBurn(msg.sender){
-       //  User burner should own what he wants to burn
-       require((balanceOf(msg.sender) > amount), "You can't burn more than you own");
-       _burn(msg.sender, amount);
+    function burn(address from, uint amount) external allowedToBurn(msg.sender){
+       require((balanceOf(from) >= amount), "You can't burn more than you own");
+       _burn(from, amount);
     }
  
     function balance(address add) view public returns (uint256) {
