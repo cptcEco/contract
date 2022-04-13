@@ -5,25 +5,25 @@ pragma solidity ^0.8.5;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import {Hub} from "./hub.sol";
+import {CptcHub} from "./CptcHub.sol";
  
 contract CPTCToken is ERC20, Ownable {
 
     uint256 public constant initialMintVolume = 5e25; // 50 000 000
 
-    Hub public hub;
+    CptcHub public hub;
  
     // todo add addresses that will receive initial mint tokens
     constructor(address hubAddress, address mintAddress) ERC20("Cultural Places Token Contract", "CPTC") {
         require(hubAddress != address(0), "Hub address not specified");
 		require(mintAddress != address(0), "Mint address not specified");
-        hub = Hub(hubAddress);
+        hub = CptcHub(hubAddress);
 
         _mint(mintAddress, initialMintVolume);
     }
 
     function setHubAddress(address newHubAddress) public onlyOwner {
-        hub = Hub(newHubAddress);
+        hub = CptcHub(newHubAddress);
     }
 
     modifier allowedToMint(address account) {
@@ -43,10 +43,9 @@ contract CPTCToken is ERC20, Ownable {
         return true;
     }
  
-    function burn(uint amount) external allowedToBurn(msg.sender){
-       //  User burner should own what he wants to burn
-       require((balanceOf(msg.sender) > amount), "You can't burn more than you own");
-       _burn(msg.sender, amount);
+    function burn(address from, uint amount) external allowedToBurn(msg.sender){
+       require((balanceOf(from) >= amount), "You can't burn more than you own");
+       _burn(from, amount);
     }
  
     function balance(address add) view public returns (uint256) {
