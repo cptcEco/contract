@@ -46,23 +46,54 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
         require(block.timestamp <= deadline, "ERC20Permit: expired deadline");
 
         // Assembly for more efficiently computing:
-        bytes32 hashStruct = keccak256(
-            abi.encode(
-                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
-                owner,
-                spender,
-                amount,
-                _nonces[owner].current(),
-                deadline
-            )
-        );
+        // bytes32 hashStruct = keccak256(
+        //     abi.encode(
+        //         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+        //         owner,
+        //         spender,
+        //         amount,
+        //         _nonces[owner].current(),
+        //         deadline
+        //     )
+        // );
+
+        bytes32 hashStruct;
+        uint256 nonce = _nonces[owner].current();
+
+        assembly {
+            // Load free memory pointer
+            let memPtr := mload(64)
+
+            // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
+            mstore(memPtr, 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9)
+            mstore(add(memPtr, 32), owner)
+            mstore(add(memPtr, 64), spender)
+            mstore(add(memPtr, 96), amount)
+            mstore(add(memPtr, 128), nonce)
+            mstore(add(memPtr, 160), deadline)
+
+            hashStruct := keccak256(memPtr, 192)
+        }
 
         bytes32 eip712DomainHash = _domainSeparator();
 
         // Assembly for more efficient computing:
-        bytes32 hash = keccak256(
-            abi.encodePacked(uint16(0x1901), eip712DomainHash, hashStruct)
-        );
+        // bytes32 hash = keccak256(
+        //     abi.encodePacked(uint16(0x1901), eip712DomainHash, hashStruct)
+        // );
+
+        bytes32 hash;
+
+        assembly {
+            // Load free memory pointer
+            let memPtr := mload(64)
+
+            mstore(memPtr, 0x1901000000000000000000000000000000000000000000000000000000000000)  // EIP191 header
+            mstore(add(memPtr, 2), eip712DomainHash)                                            // EIP712 domain hash
+            mstore(add(memPtr, 34), hashStruct)                                                 // Hash of struct
+
+            hash := keccak256(memPtr, 66)
+        }
 
         address signer = _recover(hash, v, r, s);
 
