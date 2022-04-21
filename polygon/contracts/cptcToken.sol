@@ -4,10 +4,11 @@ pragma solidity ^0.8.5;
  
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./ERC20Permit.sol";
 
 import {CptcHub} from "./CptcHub.sol";
  
-contract CPTCToken is ERC20, Ownable {
+contract CPTCToken is Ownable, ERC20Permit {
 
     uint256 public constant initialMintVolume = 5e25; // 50 000 000
 
