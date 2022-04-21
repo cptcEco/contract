@@ -16,4 +16,4 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: npm run ganache & npm run truffle:test:polygon
+      - run: npm run ganache > $ARTIFACTS_DIR/run-ganache.log & npm run truffle:test:polygon
