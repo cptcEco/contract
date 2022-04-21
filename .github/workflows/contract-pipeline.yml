@@ -18,4 +18,6 @@ jobs:
       - run: npm install
       - run: mkdir -p $ARTIFACTS_DIR
       - run: sudo chmod -R 777 $ARTIFACTS_DIR
+      - run: npx truffle networks --clean
+      - run: truffle migrate --network ganache
       - run: npm run ganache > $ARTIFACTS_DIR/run-ganache.log & npm run truffle:test:polygon
