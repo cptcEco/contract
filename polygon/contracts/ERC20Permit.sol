@@ -49,7 +49,7 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
         // bytes32 hashStruct = keccak256(
         //     abi.encode(
         //         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
-        //         owner,
+        //         owner, 
         //         spender,
         //         amount,
         //         _nonces[owner].current(),
