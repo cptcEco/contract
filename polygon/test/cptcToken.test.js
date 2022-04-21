@@ -193,10 +193,10 @@ contract('Token contract testing', async (accounts) => {
             return { v, r, s };
         };
 
-        const messageData = createPermitMessageData();
-        console.log(JSON.stringify(messageData, null, 4));
-        const sig = await signData(web3, owner, messageData.typedData);
-        console.log(sig);
+        // const messageData = createPermitMessageData();
+        // console.log(JSON.stringify(messageData, null, 4));
+        // // const sig = await signData(web3, owner, messageData.typedData);
+        // console.log(sig);
         
         // const domain = {
         //     name: contractName,
