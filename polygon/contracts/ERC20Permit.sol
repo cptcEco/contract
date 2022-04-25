@@ -17,6 +17,8 @@ import {IERC2612Permit} from "./IERC2612Permit.sol";
 abstract contract ERC20Permit is ERC20, IERC2612Permit {
     using Counters for Counters.Counter;
 
+    event Permitted(address owner, address spender, uint256 amount);
+
     mapping(address => Counters.Counter) private _nonces;
 
     // Mapping of ChainID to domain separators. This is a very gas efficient way
@@ -70,9 +72,11 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
 
         address recoveredAddress = _recover(digest, v, r, s);
 
+        // Per EIP 2612 the owner address cannot be 0x000, hence the second check.
         require(recoveredAddress == owner && owner != address(0), "ERC20:Permit:INVALID_SIGNATURE");
         
         _nonces[owner].increment();
+        emit Permitted(owner, spender, amount);
         _approve(owner, spender, amount);
     }
 
@@ -83,6 +87,16 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
         return _nonces[owner].current();
     }
 
+    
+    /* function transferFrom(address owner, address recipient, uint256 amount) external override returns (bool success_) {
+        _decreaseAllowance(owner, msg.sender, amount);
+        _transfer(owner, recipient, amount);
+        return true;
+    } */
+
+    /**
+     * @dev Internal method to update the DomainSeperator if Chainid changes.
+     **/
     function _updateDomainSeparator() private returns (bytes32) {
         uint256 chainID = _chainID();
 
@@ -155,4 +169,12 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
 
         return signer;
     }
+
+    /* function _decreaseAllowance(address owner, address spender, uint256 subtractedAmount) internal {
+        uint256 spenderAllowance = allowance[owner][spender];  // Cache to memory.
+
+        if (spenderAllowance != type(uint256).max) {
+            _approve(owner, spender, spenderAllowance - subtractedAmount);
+        }
+    } */
 }
