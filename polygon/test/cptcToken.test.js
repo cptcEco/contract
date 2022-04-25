@@ -126,6 +126,6 @@ contract('Token contract testing', async (accounts) => {
              {from: spender}
         ) // .transferFrom(owner, recipient, transferValue, {from: spender});
 
-        // expect(await token.allowance(owner, spender).call()).to.equal(transferValue);
+        expect(await token.allowance(owner, spender).call()).to.equal(transferValue);
     });
 })
