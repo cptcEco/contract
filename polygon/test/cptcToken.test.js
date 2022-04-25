@@ -39,7 +39,7 @@ contract('Token contract testing', async (accounts) => {
         assert.equal(initialMintRaw.toString(), '50000000000000000000000000', 'Initial mint value should be 50 mil tokens');
     });
 
-    it('Total suply should be updated after initial mint, additional mint and burn. Expect success.', async () => {
+    it('Total supply should be updated after initial mint, additional mint and burn. Expect success.', async () => {
         const initialMintAddress = accounts[1];
         const totalSupply = await token.totalSupply();
         const initialMintValue = '50000000000000000000000000';
@@ -364,7 +364,7 @@ contract('Token contract testing', async (accounts) => {
         await expectRevert(token.transfer(toAccount, transferValue, {from: fromAccount}), 'transfer amount exceeds balance');
     });
 
-    it('Call permit method. Expect nonce for address should be incremented after successfull transaction.', async () => {
+    it('Call permit method. Expect nonce for address should be incremented after successful transaction.', async () => {
         const spender = accounts[2];
 
         const mintingWallet = accounts[4];
