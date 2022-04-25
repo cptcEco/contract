@@ -20,14 +20,14 @@ module.exports = {
 
     networks: {
         ganache: {
-            host: 'localhost',
+            host: '127.0.0.1',
             port: 7545,
             gas: 6000000,
             network_id: '*',
         },
 
         test: {
-            host: 'localhost',
+            host: '127.0.0.1',
             port: 7545,
             gas: 6000000,
             network_id: '*',
