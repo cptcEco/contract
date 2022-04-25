@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "truffle:test:polygon": "cd polygon && truffle test --network test"
+    "truffle:test:polygon": "cd polygon && truffle test --network test",
+    "ganache": "ganache-cli -e 1000000000000 -i 1337 -p 7545 -l 10000000 -a 30 -m \"aspect ask story desert profit engage tuition leave fade giraffe exclude brief\""
   },
   "dependencies": {
     "bn": "^1.0.5",
