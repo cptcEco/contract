@@ -77,197 +77,55 @@ contract('Token contract testing', async (accounts) => {
     });
 
     it('Send transaction using permit method', async () => {
-
-        const transferValue = 100;
-        const ownerAccount = await web3.eth.accounts.create();
-        const ownerPrivateKey = ownerAccount.privateKey;
-        const owner = ownerAccount.address;
-
         const spender = accounts[2];
-        // const walletC = accounts[3];
+        const recipient = accounts[6];
         const mintingWallet = accounts[4];
 
+        // Ganache Network ID Bug: https://github.com/trufflesuite/ganache-core/issues/515
+        // Uncomment to see chain id, needs to be set manually with Ganache and be same
+        // as network id due to issue above.
+        // console.log("ChainID: " + await web3.eth.net.getId())
+
+        // Configure the hub contract to know the permission contract.
         await hub.setContractAddress('permissionContract', mintingWallet, 1);
+
+        // Init owner account:
+        const ownerAccount = await web3.eth.accounts.create();
+        const ownerPrivateKey = ownerAccount.privateKey
+        // Initialize the owners Wallet provider for Ganache.
+        const ownersWallet = new ethers.Wallet(
+            ownerPrivateKey,
+            new ethers.providers.JsonRpcProvider('http://127.0.0.1:7545')
+        );
+        const owner = await ownersWallet.getAddress()
+
+        // Mint tokens for the owner
+        const transferValue = 100;
         await token.mint(owner, transferValue, { from: mintingWallet });
 
-        const cptcTokenBalanceOwner = await token.balanceOf(owner);
-        const ethInitialBalanceOwner = await web3.eth.getBalance(owner);
-        console.log('cptc balance: ', cptcTokenBalanceOwner.toString());
-        console.log('eth balance: ', ethInitialBalanceOwner.toString());
+        const result = await signERC2612Permit(
+            ownersWallet,
+            token.address,
+            owner,
+            spender,
+            transferValue
+        );
 
-        // Domain separator types:
-        // const EIP712Domain = [
-        //     { name: "name", type: "string" },
-        //     { name: "version", type: "string" },
-        //     { name: "chainId", type: "uint256" },
-        //     { name: "verifyingContract", type: "address" },
-        // ];
-
-        // Domain separator values:
-        const contractName = await token.name();
-        const { chainId } = await web3.eth.getChainId();
-        const nonce =(await token.nonces(owner)).toNumber();
-        const SECOND = 1000;
-        const expiry = Math.trunc((Date.now() + 120 * SECOND) / SECOND);
-        const createPermitMessageData = function () {
-            const message = {
-                holder: owner,
-                spender: spender,
-                nonce: nonce,
-                deadline: expiry,
-                value: transferValue,
-            };
-
-            const typedData = JSON.stringify({
-                types: {
-                    EIP712Domain: [
-                        {
-                            name: "name",
-                            type: "string",
-                        },
-                        {
-                            name: "version",
-                            type: "string",
-                        },
-                        {
-                            name: "chainId",
-                            type: "uint256",
-                        },
-                        {
-                            name: "verifyingContract",
-                            type: "address",
-                        },
-                    ],
-                    Permit: [
-                        {
-                            name: "owner",
-                            type: "address",
-                        },
-                        {
-                            name: "spender",
-                            type: "address",
-                        },
-                        {
-                            name: "value",
-                            type: "uint256",
-                        },
-                        {
-                            name: "nonce",
-                            type: "uint256",
-                        },
-                        {
-                            name: "deadline",
-                            type: "uint256",
-                        },
-                    ],
-                },
-                primaryType: "Permit",
-                domain: {
-                    name: contractName,
-                    version: "1",
-                    chainId: chainId,
-                    verifyingContract: token.address,
-                },
-                message: message,
-            });
-
-            return {
-                typedData,
-                message,
-            };
-        };
-
-        const signData = async function (web3, owner, typeData) {
-            console.log('calling sign data');
-            const result = await web3.currentProvider.send({
-                id: 1,
-                method: "eth_signTypedData_v3",
-                params: [owner, typeData],
-                from: owner,
-            });
-            console.log('result: ', result);
-            const r = result.result.slice(0, 66);
-            const s = "0x" + result.result.slice(66, 130);
-            const v = Number("0x" + result.result.slice(130, 132));
-
-            return { v, r, s };
-        };
-
-        const messageData = createPermitMessageData();
-        console.log(JSON.stringify(messageData, null, 4));
-        const sig = await signData(web3, owner, messageData.typedData);
-        console.log(sig);
-        
-        // const domain = {
-        //     name: contractName,
-        //     version: "1",
-        //     chainId,
-        //     verifyingContract: token.address
-        // };
-
-        // // Permit interface:
-        // const ERC721PermitInterface = [
-        //     { name: "owner", type: "address" },
-        //     { name: "spender", type: "address" },
-        //     { name: "value", type: "uint256" },
-        //     { name: "nonce", type: "uint256" },
-        //     { name: "deadline", type: "uint256" },
-        // ];
-
-        // const nonce = await token.nonces(owner);
-        // console.log('nonce: ', nonce.toNumber());
-        // const transactionDeadline = Date.now() + 20 * 60;
-
-        // const message = {
-        //     owner,
-        //     spender,// address of the smart contract that I want to allow    
-        //     value: transferValue,// value in case of ERC20 
-        //     nonce: Buffer.from(nonce, 'utf8').toString('hex'),
-        //     deadline: transactionDeadline, //permit for 20 minutes only
-        // };
-
-        // const data = JSON.stringify({
-        //     types: {
-        //         EIP712Domain,
-        //         Permit: ERC721PermitInterface,
-        //     },
-        //     domain,
-        //     primaryType: "Permit",
-        //     message,
-        // });
-
-        // console.log(data);
-        // //   console.log(web3.currentProvider);
-        // web3.currentProvider.send(
-        //     {
-        //         method: "eth_signTypedData_v3",
-        //         params: [ownerAccount, data],
-        //         from: ownerAccount
-        //     }).then((result)=>{
-        //         console.log('inside promise: ', result);
-        //     }).catch((error)=>{
-        //         console.log(error);
-        //     });
-        // const result = await web3.currentProvider.send(
-        //     {
-        //         method: "eth_signTypedData_v3",
-        //         params: [ownerAccount, data],
-        //         from: ownerAccount
-        //     });
-
+        // Uncomment to see result of signing.
         // console.log(result);
-        // const ethersWallet = new ethers.Wallet(ownerPrivateKey, new ethers.providers.JsonRpcProvider('http://localhost:7545')); 
-        // const result = await signERC2612Permit(ethersWallet, token.address, owner, spender, transferValue);
-        // // console.log(result);
-        // await token.permit(
-        //     owner,
-        //     spender,
-        //     transferValue,
-        //     result.deadline,
-        //     result.v,
-        //     result.r,
-        //     result.s,
-        //     { from: spender }
-        // );
+        console.log("Owner: " + owner)
+
+        await token.permit(
+             owner,
+             spender,
+             transferValue,
+             result.deadline,
+             result.v,
+             result.r,
+             result.s,
+             {from: spender}
+        ) // .transferFrom(owner, recipient, transferValue, {from: spender});
+
+        // expect(await token.allowance(owner, spender).call()).to.equal(transferValue);
     });
 })

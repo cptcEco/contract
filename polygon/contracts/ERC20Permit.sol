@@ -45,60 +45,33 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
     ) public virtual override {
         require(block.timestamp <= deadline, "ERC20Permit: expired deadline");
 
-        // Assembly for more efficiently computing:
-        // bytes32 hashStruct = keccak256(
-        //     abi.encode(
-        //         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
-        //         owner, 
-        //         spender,
-        //         amount,
-        //         _nonces[owner].current(),
-        //         deadline
-        //     )
-        // );
+        // Appendix F in the Ethereum Yellow paper (https://ethereum.github.io/yellowpaper/paper.pdf), defines
+        // the valid range for s in (301): 0 < s < secp256k1n ÷ 2 + 1, and for v in (302): v ∈ {27, 28}.
+        require(
+            uint256(s) <= uint256(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) &&
+            (v == 27 || v == 28),
+            "ERC20:P:MALLEABLE"
+        );
 
-        bytes32 hashStruct;
-        uint256 nonce = _nonces[owner].current();
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                _domainSeparator(),
+                keccak256(abi.encode(
+                    keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                    owner,
+                    spender,
+                    amount,
+                    _nonces[owner].current(),
+                    deadline)
+                )
+            )
+        );
 
-        assembly {
-            // Load free memory pointer
-            let memPtr := mload(64)
+        address recoveredAddress = _recover(digest, v, r, s);
 
-            // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
-            mstore(memPtr, 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9)
-            mstore(add(memPtr, 32), owner)
-            mstore(add(memPtr, 64), spender)
-            mstore(add(memPtr, 96), amount)
-            mstore(add(memPtr, 128), nonce)
-            mstore(add(memPtr, 160), deadline)
-
-            hashStruct := keccak256(memPtr, 192)
-        }
-
-        bytes32 eip712DomainHash = _domainSeparator();
-
-        // Assembly for more efficient computing:
-        // bytes32 hash = keccak256(
-        //     abi.encodePacked(uint16(0x1901), eip712DomainHash, hashStruct)
-        // );
-
-        bytes32 hash;
-
-        assembly {
-            // Load free memory pointer
-            let memPtr := mload(64)
-
-            mstore(memPtr, 0x1901000000000000000000000000000000000000000000000000000000000000)  // EIP191 header
-            mstore(add(memPtr, 2), eip712DomainHash)                                            // EIP712 domain hash
-            mstore(add(memPtr, 34), hashStruct)                                                 // Hash of struct
-
-            hash := keccak256(memPtr, 66)
-        }
-
-        address signer = _recover(hash, v, r, s);
-
-        require(signer == owner, "ERC20Permit: invalid signature");
-
+        require(recoveredAddress == owner, "ERC20:Permit:INVALID_SIGNATURE");
+        
         _nonces[owner].increment();
         _approve(owner, spender, amount);
     }
@@ -170,16 +143,15 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
             uint256(s) >
             0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
         ) {
-            revert("ECDSA: invalid signature 's' value");
+            revert("ERC20:Permit:INVALID_S_VAL");
         }
 
         if (v != 27 && v != 28) {
-            revert("ECDSA: invalid signature 'v' value");
+            revert("ERC20_Permit:INVALID_V_VAL");
         }
 
         // If the signature is valid (and not malleable), return the signer address
         address signer = ecrecover(hash, v, r, s);
-        require(signer != address(0), "ECDSA: invalid signature");
 
         return signer;
     }
