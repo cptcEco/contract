@@ -10,7 +10,7 @@ import {CptcHub} from "./CptcHub.sol";
  
 contract CPTCToken is Ownable, ERC20Permit {
 
-    uint256 public constant initialMintVolume = 5e25; // 50 000 000
+    uint256 public constant initialMintVolume = 495e23; //49 500 000
 
     CptcHub public hub;
  

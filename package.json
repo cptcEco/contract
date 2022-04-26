@@ -4,11 +4,15 @@
   "private": true,
   "scripts": {
     "truffle:test:polygon": "cd polygon && truffle test --network test",
+    "truffle:deploy:mumbai": "cd polygon && truffle migrate --network mumbai",
+    "truffle:deploy:live": "cd polygon && truffle migrate --network live",
     "ganache": "ganache-cli -e 1000000000000 -i 1337 -p 7545 -l 10000000 -a 30 -m \"aspect ask story desert profit engage tuition leave fade giraffe exclude brief\""
   },
   "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.7",
     "bn": "^1.0.5",
     "chai": "^4.3.6",
+    "dotenv": "^16.0.0",
     "eth-permit": "^0.2.1",
     "ethers": "^5.6.4",
     "ganache-core": "^2.13.2",
