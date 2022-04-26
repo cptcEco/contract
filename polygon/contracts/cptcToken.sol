@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // todo update license
-pragma solidity ^0.8.5;
+pragma solidity ^0.8.0;
  
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -10,7 +10,7 @@ import {CptcHub} from "./CptcHub.sol";
  
 contract CptcToken is Ownable, ERC20Permit {
 
-    uint256 public constant initialMintVolume = 495e23; //49 500 000
+    uint256 public constant INITIAL_MINT_VOLUME = 495e23; //49 500 000
 
     CptcHub public hub;
  
@@ -20,10 +20,10 @@ contract CptcToken is Ownable, ERC20Permit {
 		require(mintAddress != address(0), "Mint address not specified");
         hub = CptcHub(hubAddress);
 
-        _mint(mintAddress, initialMintVolume);
+        _mint(mintAddress, INITIAL_MINT_VOLUME);
     }
 
-    function setHubAddress(address newHubAddress) public onlyOwner {
+    function setHubAddress(address newHubAddress) external onlyOwner {
         hub = CptcHub(newHubAddress);
     }
 
@@ -49,7 +49,7 @@ contract CptcToken is Ownable, ERC20Permit {
        _burn(from, amount);
     }
  
-    function balance(address add) view public returns (uint256) {
+    function balance(address add) external view returns (uint256) {
         return balanceOf(add);
     }
 }

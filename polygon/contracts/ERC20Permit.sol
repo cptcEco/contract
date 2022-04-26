@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.5;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -42,7 +42,7 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public virtual override {
+    ) external virtual override {
         require(block.timestamp <= deadline, "ERC20Permit: expired deadline");
 
         // Appendix F in the Ethereum Yellow paper (https://ethereum.github.io/yellowpaper/paper.pdf), defines
@@ -80,7 +80,7 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
     /**
      * @dev See {IERC2612Permit-nonces}.
      */
-    function nonces(address owner) public override view returns (uint256) {
+    function nonces(address owner) external override view returns (uint256) {
         return _nonces[owner].current();
     }
 
