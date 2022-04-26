@@ -8,7 +8,7 @@ import "./ERC20Permit.sol";
 
 import {CptcHub} from "./CptcHub.sol";
  
-contract CPTCToken is Ownable, ERC20Permit {
+contract CptcToken is Ownable, ERC20Permit {
 
     uint256 public constant initialMintVolume = 495e23; //49 500 000
 
