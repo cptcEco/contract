@@ -95,7 +95,7 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
      * @dev Internal method to update the DomainSeperator if Chainid changes.
      **/
     function _updateDomainSeparator() private returns (bytes32) {
-        uint256 chainID = _chainID();
+        uint256 chainID = block.chainid;
 
         // no need for assembly, running very rarely
         bytes32 newDomainSeparator = keccak256(
@@ -117,22 +117,13 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
 
     // Returns the domain separator, updating it if chainID changes
     function _domainSeparator() private returns (bytes32) {
-        bytes32 domainSeparator = domainSeparators[_chainID()];
+        bytes32 domainSeparator = domainSeparators[block.chainid];
 
         if (domainSeparator != 0x00) {
             return domainSeparator;
         }
 
         return _updateDomainSeparator();
-    }
-
-    function _chainID() view private returns (uint256) {
-        uint256 chainID;
-        assembly {
-            chainID := chainid()
-        }
-
-        return chainID;
     }
 
     function _recover(

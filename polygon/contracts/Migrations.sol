@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 contract Migrations {
     address public owner = msg.sender;
-    uint256 public last_completed_migration;
+    uint256 public LAST_COMPLETED_MIGRATION;
 
     modifier restricted() {
         require(
@@ -14,6 +14,6 @@ contract Migrations {
     }
 
     function setCompleted(uint256 completed) external restricted {
-        last_completed_migration = completed;
+        LAST_COMPLETED_MIGRATION = completed;
     }
 }
