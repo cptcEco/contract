@@ -1,0 +1,21 @@
+name: Contract Pipeline
+
+on: [pull_request]
+env:
+  ARTIFACTS_DIR: artifacts
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [17.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: mkdir -p $ARTIFACTS_DIR
+      - run: sudo chmod -R 777 $ARTIFACTS_DIR
+      - run: npm run ganache > $ARTIFACTS_DIR/run-ganache.log & npm run truffle:test:polygon
