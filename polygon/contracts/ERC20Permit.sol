@@ -17,8 +17,6 @@ import {IERC2612Permit} from "./IERC2612Permit.sol";
 abstract contract ERC20Permit is ERC20, IERC2612Permit {
     using Counters for Counters.Counter;
 
-    event Permitted(address owner, address spender, uint256 amount);
-
     mapping(address => Counters.Counter) private _nonces;
 
     // Mapping of ChainID to domain separators. This is a very gas efficient way
@@ -76,7 +74,6 @@ abstract contract ERC20Permit is ERC20, IERC2612Permit {
         require(recoveredAddress == owner && owner != address(0), "ERC20:Permit:INVALID_SIGNATURE");
         
         _nonces[owner].increment();
-        emit Permitted(owner, spender, amount);
         _approve(owner, spender, amount);
     }
 
