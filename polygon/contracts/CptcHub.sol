@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // todo update license
-pragma solidity ^0.8.5;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -27,12 +27,12 @@ contract CptcHub is Ownable{
         emit ContractsChanged();
     }
 
-    function getContractAddress(string memory contractName)  public view returns(address) {
+    function getContractAddress(string memory contractName) external view returns(address) {
         bytes32 index = keccak256(abi.encodePacked(contractName));
         return contractAddress[index];
     }
 
-    function getContractAuthorisation(address selectedContractAddress) public view returns (uint256) {
+    function getContractAuthorisation(address selectedContractAddress) external view returns (uint256) {
         return contractAuthorisationList[selectedContractAddress];
     }
 }
