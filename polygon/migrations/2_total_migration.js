@@ -1,6 +1,5 @@
 require('dotenv').config({ path: `${__dirname}/../../.env` });
 
-const initialMintPublicKey = process.env.MUMBAI_INITIAL_MINT_PUBLIC_KEY;
 var CptcToken = artifacts.require('CptcToken');
 var CptcHub = artifacts.require('CptcHub');
 
@@ -40,17 +39,25 @@ module.exports = async (deployer, network, accounts) => {
                 console.log('hub contract address: ', hub.address);
                 console.log('hub contract owner: ', accounts[0]);
             });
-        token = await deployer.deploy(CptcToken, hub.address, accounts[1]);
+        const mumbai_initialMintPublicKey = process.env.MUMBAI_INITIAL_MINT_PUBLIC_KEY;
+        token = await deployer.deploy(CptcToken, hub.address, mumbai_initialMintPublicKey);
         console.log('token contract address: ', token.address);
         break;
     case 'live':
-        await deployer.deploy(CptcHub, { gas: 6000000, from: accounts[0] })
+        // this is deployer address for hub contract
+        // it will also be the owner
+        // For the future we will need this account for enabling 
+        // minting/burning of CPTC tokens through contracts
+        const deployerAddress = accounts[0];
+        await deployer.deploy(CptcHub, { gas: 6000000, from: deployerAddress })
             .then((result) => {
                 hub = result;
                 console.log('hub contract address: ', hub.address);
-                console.log('hub contract owner: ', accounts[0]);
+                console.log('hub contract owner: ', deployerAddress);
             });
-        token = await deployer.deploy(CptcToken, hub.address, initialMintPublicKey);
+        // initial minting volume will be transfered to this address
+        const live_initialMintPublicKey = process.env.MUMBAI_INITIAL_MINT_PUBLIC_KEY;
+        token = await deployer.deploy(CptcToken, hub.address, live_initialMintPublicKey);
         console.log('token contract address: ', token.address);
         break;
     default:

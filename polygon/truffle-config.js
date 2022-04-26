@@ -2,9 +2,11 @@ require('dotenv').config({ path: `${__dirname}/../.env` });
 // // eslint-disable-next-line import/no-extraneous-dependencies
 var HDWalletProvider = require('@truffle/hdwallet-provider');
 
-const deployerPrivateKey = process.env.MUMBAI_DEPLOYER_PRIVATE_KEY;
+const mumbai_deployerPrivateKey = process.env.MUMBAI_DEPLOYER_PRIVATE_KEY;
+const mumbai_rpcEndpoint = process.env.MUMBAI_ACCESS_KEY;
 
-const rpcEndpoint = process.env.MUMBAI_ACCESS_KEY;
+const live_deployerPrivateKey = process.env.LIVE_DEPLOYER_PRIVATE_KEY;
+const live_rpcEndpoint = process.env.LIVE_ACCESS_KEY;
 
 module.exports = {
     compilers: {
@@ -34,23 +36,22 @@ module.exports = {
             network_id: '1337',
         },
         mumbai: {
-            host: rpcEndpoint, // Connect to geth on the specified
-            provider: () => new HDWalletProvider([deployerPrivateKey], rpcEndpoint, 0, 1),
+            host: mumbai_rpcEndpoint, // Connect to geth on the specified
+            provider: () => new HDWalletProvider([mumbai_deployerPrivateKey], mumbai_rpcEndpoint, 0, 1),
             network_id: 80001,
             confirmations: 2,
             timeoutBlocks: 200,
             skipDryRun: true
         },
 
-        // live: {
-        //     host: 'rpcEndpoint',
-        //     port: 8545,
-        //     provider: () => new HDWalletProvider([private_key], rpc_endpoint, 1),
-        //     network_id: 1,
-        //     gas: 6000000, // Gas limit used for deploys
-        //     websockets: true,
-        //     skipDryRun: true,
-        // },
+        live: {
+            host: live_rpcEndpoint,
+            provider: () => new HDWalletProvider([private_key], live_rpcEndpoint, 0, 1),
+            network_id: 137,
+            confirmations: 2,
+            timeoutBlocks: 200,
+            skipDryRun: true
+        },
 
     },
 };
