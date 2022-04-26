@@ -36,15 +36,15 @@ contract('Token contract testing', async (accounts) => {
     it('Should have initial mint tokens', async () => {
         const initialMintRaw = await token.balanceOf(accounts[1]);
 
-        assert.equal(initialMintRaw.toString(), '50000000000000000000000000', 'Initial mint value should be 50 mil tokens');
+        assert.equal(initialMintRaw.toString(), '49500000000000000000000000', 'Initial mint value should be 49,5 mil tokens');
     });
 
     it('Total supply should be updated after initial mint, additional mint and burn. Expect success.', async () => {
         const initialMintAddress = accounts[1];
         const totalSupply = await token.totalSupply();
-        const initialMintValue = '50000000000000000000000000';
+        const initialMintValue = '49500000000000000000000000';
         expect(totalSupply.toString()).to.equal(initialMintValue);
-        assert.equal(totalSupply.toString(), '50000000000000000000000000', 'Initial mint value should be 50 mil tokens');
+        assert.equal(totalSupply.toString(), '49500000000000000000000000', 'Initial mint value should be 49,5 mil tokens');
 
         const burnContractAddress = accounts[7];
         await hub.setContractAddress('burnContract', burnContractAddress, 2);

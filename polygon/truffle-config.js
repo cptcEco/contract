@@ -1,9 +1,12 @@
-// require('dotenv').config({ path: `${__dirname}/../../../.env` });
+require('dotenv').config({ path: `${__dirname}/../.env` });
 // // eslint-disable-next-line import/no-extraneous-dependencies
-// var HDWalletProvider = require('@truffle/hdwallet-provider');
+var HDWalletProvider = require('@truffle/hdwallet-provider');
 
-// const private_key = process.env.RINKEBY_PRIVATE_KEY;
-// const rpc_endpoint = process.env.RINKEBY_ACCESS_KEY;
+const mumbai_deployerPrivateKey = process.env.MUMBAI_DEPLOYER_PRIVATE_KEY;
+const mumbai_rpcEndpoint = process.env.MUMBAI_ACCESS_KEY;
+
+const live_deployerPrivateKey = process.env.LIVE_DEPLOYER_PRIVATE_KEY;
+const live_rpcEndpoint = process.env.LIVE_ACCESS_KEY;
 
 module.exports = {
     compilers: {
@@ -30,28 +33,25 @@ module.exports = {
             host: '127.0.0.1',
             port: 7545,
             gas: 6000000,
-            network_id: '5777',
+            network_id: '1337',
+        },
+        mumbai: {
+            host: mumbai_rpcEndpoint, // Connect to geth on the specified
+            provider: () => new HDWalletProvider([mumbai_deployerPrivateKey], mumbai_rpcEndpoint, 0, 1),
+            network_id: 80001,
+            confirmations: 2,
+            timeoutBlocks: 200,
+            skipDryRun: true
         },
 
-        // rinkeby: {
-        //     host: 'localhost', // Connect to geth on the specified
-        //     port: 8545,
-        //     provider: () => new HDWalletProvider([private_key], rpc_endpoint, 4),
-        //     network_id: 4,
-        //     gas: 6500000, // Gas limit used for deploys
-        //     websockets: true,
-        //     skipDryRun: true,
-        // },
-
-        // live: {
-        //     host: 'localhost',
-        //     port: 8545,
-        //     provider: () => new HDWalletProvider([private_key], rpc_endpoint, 1),
-        //     network_id: 1,
-        //     gas: 6000000, // Gas limit used for deploys
-        //     websockets: true,
-        //     skipDryRun: true,
-        // },
+        live: {
+            host: live_rpcEndpoint,
+            provider: () => new HDWalletProvider([private_key], live_rpcEndpoint, 0, 1),
+            network_id: 137,
+            confirmations: 2,
+            timeoutBlocks: 200,
+            skipDryRun: true
+        },
 
     },
 };
