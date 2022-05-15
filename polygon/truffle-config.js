@@ -43,6 +43,14 @@ module.exports = {
             timeoutBlocks: 200,
             skipDryRun: true
         },
+        nft: {
+            host: mumbai_rpcEndpoint, // Connect to geth on the specified
+            provider: () => new HDWalletProvider([mumbai_deployerPrivateKey], mumbai_rpcEndpoint, 0, 1),
+            network_id: 80001,
+            confirmations: 2,
+            timeoutBlocks: 200,
+            skipDryRun: true
+        },
 
         live: {
             host: live_rpcEndpoint,

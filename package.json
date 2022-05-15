@@ -6,6 +6,9 @@
     "truffle:test:polygon": "cd polygon && truffle test --network test",
     "truffle:deploy:mumbai": "cd polygon && truffle migrate --network mumbai",
     "truffle:deploy:live": "cd polygon && truffle migrate --network live",
+    "truffle:migrate:nft": "cd polygon && truffle migrate --network nft",
+    "truffle:deploy:nft": "cd polygon && truffle deploy --network nft",
+    "truffle:reset:deploy:nft": "cd polygon && truffle deploy --reset --network nft",
     "ganache": "ganache-cli -e 1000000000000 -i 1337 -p 7545 -l 10000000 -a 30 -m \"aspect ask story desert profit engage tuition leave fade giraffe exclude brief\""
   },
   "dependencies": {

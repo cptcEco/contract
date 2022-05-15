@@ -1,0 +1,16 @@
+{
+    "attributes": [
+      {
+        "trait_type": "Breed",
+        "value": "Boston Terrier"
+      },
+      {
+        "trait_type": "Eye color",
+        "value": "Brown"
+      }
+    ],
+    "description": "The world's most adorable and sensitive pup.",
+    "image": "ipfs://QmQLggrfbapA2M1ovZTaaXvG335DaCaKCZaiixi6QSzcuf",
+    "name": "Ljubica"
+  }
+  
