@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721Metadata.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CptcNFT is ERC721Metadata, ERC721MetadataMintable, ERC721Pausable, Ownable {
+contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Pausable, Ownable {
     address payable private paymentReceivingAccount;
 
     using Counters for Counters.Counter;    
@@ -26,8 +26,12 @@ contract CptcNFT is ERC721Metadata, ERC721MetadataMintable, ERC721Pausable, Owna
 
     uint256 private _presaleTokenAmount = 1000;
 
-    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol) ERC721Metadata(_name, _symbol) {
         paymentReceivingAccount = payable(msg.sender);
+    }
+
+    function totalSupply() public {
+        return _collectionSize;
     }
 
     modifier presaleInProgress() {
