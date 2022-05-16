@@ -4,21 +4,20 @@ require('dotenv').config({ path: `./.env` });
 
 const NFT_ADDRESS = '0x2d831B3d90377eDA7E9C546bE59518895A3cB206';
 
+// initialize web3
+const web3 = new Web3(new Web3.providers.HttpProvider(process.env.MUMBAI_ACCESS_KEY));
+// initialize contracts
+const nftFile = fs.readFileSync('./polygon/build/contracts/CptcNFTDjordjeTest.json');
+const nftAbi = JSON.parse(nftFile).abi;
+const nftContract = new web3.eth.Contract(
+    nftAbi,
+    NFT_ADDRESS,
+);
 
 class NftTest {
 
     async mint(tokenURI) {
-        // initialize web3
-        const web3 = new Web3(new Web3.providers.HttpProvider(process.env.MUMBAI_ACCESS_KEY));
-        // initialize contracts
-        const nftFile = fs.readFileSync('./polygon/build/contracts/CptcNFTDjordjeTest.json');
-        const nftAbi = JSON.parse(nftFile).abi;
-
-        const nftContract = new web3.eth.Contract(
-            nftAbi,
-            NFT_ADDRESS,
-        );
-        console.log('Contract fetched');
+        
         const nonce = await web3.eth.getTransactionCount(process.env.MUMBAI_DEPLOYER_PUBLIC_KEY, "latest") //get latest nonce
         console.log('Nonce fetched');
         //the transaction
@@ -54,8 +53,14 @@ class NftTest {
                 console.log(" Promise failed:", err)
             })
     }
+
+    async getNftUrl(nftId) {
+        const nftUrl = await nftContract.tokenURI(nftId);
+
+        console.log('NFT url: ', nftUrl);
+    }
 }
 
 const nftTest = new NftTest();
-
-nftTest.mint('ipfs://QmSR9ScrV23KMRMDNJr895QFEzdAVNBpt2dNDvgk6Zw7fb');
+nftTest.getNftUrl(1);
+//nftTest.mint('ipfs://QmSR9ScrV23KMRMDNJr895QFEzdAVNBpt2dNDvgk6Zw7fb');
