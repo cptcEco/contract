@@ -5,6 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721MetadataMintable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pauseable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Metadata.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -34,6 +35,32 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
         return _collectionSize;
     }
 
+    /*
+    @dev
+    Sets the base uri and subsequent the token URIs.
+    */
+    function setBaseURI(string BaseURI) public onlyOwner {
+        _setBaseURI(BaseURI);
+        _setTokenURIs();
+    }
+
+    /*
+    @dev
+    Internal method to set token URIs of the collection. Required after
+    BaseURI or collectionSize changed.
+    */
+    function _setTokenURIs() private {
+        for (uint i=0; i<_collectionSize; i++) {
+            _setTokenURI(i, string(abi.encodePacked(Strings.toString(i), ".json")));
+        }
+        
+    }
+
+    function setCollectionSize(uint256 collectionSize) public onlyOwner {
+        _collectionSize = collectionSize;
+        _setTokenURIs();
+    }
+
     modifier presaleInProgress() {
         require(_presaleInProgress, "CptcNFT: Pre-sale not in progress");
         _ ;
@@ -57,10 +84,6 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
 
     function getPrice() public returns (uint256) {
         return _tokenPrice;
-    }
-
-    function setCollectionSize(uint256 collectionSize) public onlyOwner {
-        _collectionSize = collectionSize;
     }
 
     function setPresaleTokenAmount(uint256 presaleTokenAmount) public onlyOwner {
