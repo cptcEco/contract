@@ -13,17 +13,17 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
     address payable private paymentReceivingAccount;
 
     using Counters for Counters.Counter;    
-    Counters.Counter private _tokenIds;
+    Counters.Counter private _currentTokenId;
+
+    uint256 private _collectionSize = 1000;
 
     mapping(address => bool) _whitelist;
 
-    bool private _presaleInProgress;
+    bool private _preSaleInProgress;
 
-    uint256 private _tokenPrice = 222e18;
+    uint256 private _preSaleTokenPrice = 222e18;
 
-    uint256 private _mintLimitPerUser = 100;
-
-    uint256 private _collectionSize = 1000;
+    uint256 private _preSaleLimitPerUser = 5;
 
     uint256 private _presaleTokenAmount = 1000;
 
@@ -47,47 +47,45 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
     /*
     @dev
     Internal method to set token URIs of the collection. Required after
-    BaseURI or collectionSize changed.
+    BaseURI changed.
     */
     function _setTokenURIs() private {
-        for (uint i=0; i<_collectionSize; i++) {
+        for (uint i=0; i<_currentTokenId; i++) {
             _setTokenURI(i, string(abi.encodePacked(Strings.toString(i), ".json")));
-        }
-        
+        } 
     }
 
     function setCollectionSize(uint256 collectionSize) public onlyOwner {
         _collectionSize = collectionSize;
-        _setTokenURIs();
+    }
+
+    function setPreSaleLimitPerUser(uint256 limit) public onlyOwner {
+        _preSaleLimitPerUser = limit;
+    }
+
+    function setPreSalePrice(uint256 price) public onlyOwner {
+        _preSaleTokenPrice = price;
+    }
+
+    function getPreSalePrice() public returns (uint256) {
+        return _preSaleTokenPrice;
+    }
+
+    function setPreSaleTokenAmount(uint256 presaleTokenAmount) public onlyOwner {
+        _presaleTokenAmount = presaleTokenAmount;
     }
 
     modifier presaleInProgress() {
-        require(_presaleInProgress, "CptcNFT: Pre-sale not in progress");
+        require(_preSaleInProgress, "CptcNFT: Pre-sale not in progress");
         _ ;
     }
 
     function startPresale() public onlyOwner {
-        _presaleInProgress = true;
+        _preSaleInProgress = true;
     }
 
     function endPresale() public onlyOwner {
-        _presaleInProgress = false;
-    }
-
-    function setMintLimitPerUser(uint256 limit) public onlyOwner {
-        _mintLimitPerUser = limit;
-    }
-
-    function setPrice(uint256 price) public onlyOwner {
-        _tokenPrice = price;
-    }
-
-    function getPrice() public returns (uint256) {
-        return _tokenPrice;
-    }
-
-    function setPresaleTokenAmount(uint256 presaleTokenAmount) public onlyOwner {
-        _presaleTokenAmount = presaleTokenAmount;
+        _preSaleInProgress = false;
     }
     
     function whitelist(address _address) public onlyOwner {
@@ -95,28 +93,30 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
         _whitelist[_address] = true;
     }
 
-    function whitelistMultiple(address[] memory _addresses) public onlyOwner {
+    function whitelistBulk(address[] memory _addresses) public onlyOwner {
         for (uint i=0; i<_addresses.length; i++) {
             whitelist(_addresses[i]);
         }
     }
 
-    function mintPresaleNFT(address recipient, string memory tokenURI)
+    function preSaleMint(address recipient, uint amount)
         public
         presaleInProgress
         payable
         returns (uint256)
     {
-        require(msg.value >= _tokenPrice, "CptcNFT: not enough tokens sent. Check nft price!");
-        require(balanceOf(msg.sender) >= _mintLimitPerUser, "CptcNFT: mint limit per user reached!");
+        // todo: figure wether recipient is blacklisted and also remove from whitelist after
+        // one call to this funciton.
+        require(msg.value >= (_preSaleTokenPrice * amount), "CptcNFT: not enough tokens sent. Check nft price!");
+        require(amount <= _preSaleLimitPerUser, "CptcNFT: mint limit per user reached!");
         paymentReceivingAccount.transfer(msg.value);
-        _tokenIds.increment();
 
-        uint256 newItemId = _tokenIds.current();
-        _mint(recipient, newItemId);
-        _setTokenURI(newItemId, tokenURI);
-
-        return newItemId;
+        for (uint i=0; i<_addresses.length; i++) {
+            _tokenIds.increment();
+            uint256 newItemId = _tokenIds.current();
+            _mint(recipient, newItemId);
+            _setTokenURI(newItemId, string(abi.encodePacked(Strings.toString(newItemId), ".json")));
+        }
     }
 
 }
