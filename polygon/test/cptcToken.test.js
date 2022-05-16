@@ -26,7 +26,7 @@ async function updateBalances(when, owner, spender, recipient, tokenContract, we
     balances.recipient.eth[when] = (await web3.eth.getBalance(recipient)).toString();
 }
 
-contract('Token contract testing', async (accounts) => {
+contract.skip('Token contract testing', async (accounts) => {
     beforeEach(async () => {
         // Get contracts used in hook
         hub = await CptcHub.deployed();
