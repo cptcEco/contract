@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721MetadataMintable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pauseable.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Metadata.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Pausable, Ownable {
+contract CptcNFTCollection is ERC721URIStorage, Ownable {
     address payable private paymentReceivingAccount;
 
     using Counters for Counters.Counter;    
@@ -27,56 +25,51 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
 
     uint256 private _presaleTokenAmount = 1000;
 
-    constructor(string memory _name, string memory _symbol) ERC721Metadata(_name, _symbol) {
+    string private _baseUri;
+
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         paymentReceivingAccount = payable(msg.sender);
     }
 
-    function totalSupply() public {
+    function totalSupply() view public returns (uint256) {
         return _collectionSize;
     }
 
-    /*
-    @dev
-    Sets the base uri and subsequent the token URIs.
-    */
-    function setBaseURI(string BaseURI) public onlyOwner {
-        _setBaseURI(BaseURI);
-        _setTokenURIs();
+    function setBaseURI(string memory baseURI) public onlyOwner {
+        _baseUri = baseURI;
     }
 
-    /*
-    @dev
-    Internal method to set token URIs of the collection. Required after
-    BaseURI changed.
-    */
-    function _setTokenURIs() private {
-        for (uint i=0; i<_currentTokenId; i++) {
-            _setTokenURI(i, string(abi.encodePacked(Strings.toString(i), ".json")));
-        } 
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _baseUri;
     }
 
     function setCollectionSize(uint256 collectionSize) public onlyOwner {
         _collectionSize = collectionSize;
     }
 
-    function setPreSaleLimitPerUser(uint256 limit) public onlyOwner {
+    function setPresaleLimitPerUser(uint256 limit) public onlyOwner {
         _preSaleLimitPerUser = limit;
     }
 
-    function setPreSalePrice(uint256 price) public onlyOwner {
+    function setPresalePrice(uint256 price) public onlyOwner {
         _preSaleTokenPrice = price;
     }
 
-    function getPreSalePrice() public returns (uint256) {
+    function getPresalePrice() view public returns (uint256) {
         return _preSaleTokenPrice;
     }
 
-    function setPreSaleTokenAmount(uint256 presaleTokenAmount) public onlyOwner {
+    function setPresaleTokenAmount(uint256 presaleTokenAmount) public onlyOwner {
         _presaleTokenAmount = presaleTokenAmount;
     }
 
     modifier presaleInProgress() {
-        require(_preSaleInProgress, "CptcNFT: Pre-sale not in progress");
+        require(_preSaleInProgress, "CptcNFTCollection: Pre-sale not in progress");
+        _ ;
+    }
+
+    modifier onlyWhitelisted(address _address) {
+        require(_whitelist[_address], "CptcNFTCollection: only whitelisted accounts allowed!");
         _ ;
     }
 
@@ -89,8 +82,13 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
     }
     
     function whitelist(address _address) public onlyOwner {
-        require(_address != address(0), "CptcNFT: whitelist for the zero address");
+        require(_address != address(0), "CptcNFTCollection: whitelist for the zero address");
         _whitelist[_address] = true;
+    }
+
+    function _removeFromWhitelist(address _address) private {
+        require(_address != address(0), "CptcNFTCollection: remove from whitelist for the zero address");
+        _whitelist[_address] = false;
     }
 
     function whitelistBulk(address[] memory _addresses) public onlyOwner {
@@ -101,23 +99,22 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
 
     function preSaleMint(address recipient, uint amount)
         public
+        onlyWhitelisted(msg.sender)
         presaleInProgress
         payable
-        returns (uint256)
     {
-        // todo: figure wether recipient is whitelist and also remove from whitelist after
-        // one call to this funciton.
-        require(msg.value >= (_preSaleTokenPrice * amount), "CptcNFT: not enough tokens sent. Check nft price!");
-        require(amount <= _preSaleLimitPerUser, "CptcNFT: mint limit per user reached!");
+        require(msg.value >= (_preSaleTokenPrice * amount), "CptcNFTCollection: not enough tokens sent. Check nft price!");
+        require(amount <= _preSaleLimitPerUser, "CptcNFTCollection: mint limit per user reached!");
+        require(_currentTokenId.current() + amount < _collectionSize, "CptcNFTCollection: not enough tokens left for minting!");
+
         paymentReceivingAccount.transfer(msg.value);
 
         for (uint i=0; i<amount; i++) {
-            _tokenIds.increment();
-            uint256 newItemId = _tokenIds.current();
+            _currentTokenId.increment();
+            uint256 newItemId = _currentTokenId.current();
             _mint(recipient, newItemId);
             _setTokenURI(newItemId, string(abi.encodePacked(Strings.toString(newItemId), ".json")));
         }
-        // Remove from whitelist
+        _removeFromWhitelist(msg.sender);
     }
-
 }
