@@ -1,6 +1,10 @@
 MUMBAI_DEPLOYER_PRIVATE_KEY=<private_key_for_deployer>
+MUMBAI_DEPLOYER_PUBLIC_KEY=<>
 MUMBAI_INITIAL_MINT_PUBLIC_KEY=<public_key_for_initial_mint>
 MUMBAI_ACCESS_KEY=https://rpc-mumbai.matic.today
+
+NFT_WHITELIST_ACC_PUBLIC=<>
+NFT_WHITELIST_ACC_PRIVATE=<>
 
 LIVE_DEPLOYER_PRIVATE_KEY=<private_key_for_deployer>
 LIVE_INITIAL_MINT_PUBLIC_KEY=<public_key_for_initial_mint>
