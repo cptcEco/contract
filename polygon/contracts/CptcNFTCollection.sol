@@ -105,18 +105,19 @@ contract CptcNFTCollection is ERC721Metadata, ERC721MetadataMintable, ERC721Paus
         payable
         returns (uint256)
     {
-        // todo: figure wether recipient is blacklisted and also remove from whitelist after
+        // todo: figure wether recipient is whitelist and also remove from whitelist after
         // one call to this funciton.
         require(msg.value >= (_preSaleTokenPrice * amount), "CptcNFT: not enough tokens sent. Check nft price!");
         require(amount <= _preSaleLimitPerUser, "CptcNFT: mint limit per user reached!");
         paymentReceivingAccount.transfer(msg.value);
 
-        for (uint i=0; i<_addresses.length; i++) {
+        for (uint i=0; i<amount; i++) {
             _tokenIds.increment();
             uint256 newItemId = _tokenIds.current();
             _mint(recipient, newItemId);
             _setTokenURI(newItemId, string(abi.encodePacked(Strings.toString(newItemId), ".json")));
         }
+        // Remove from whitelist
     }
 
 }
