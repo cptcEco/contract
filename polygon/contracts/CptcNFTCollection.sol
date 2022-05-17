@@ -91,7 +91,7 @@ contract CptcNFTCollection is ERC721URIStorage, Ownable {
         _whitelist[_address] = false;
     }
 
-    function whitelistBulk(address[] memory _addresses) public onlyOwner {
+    function whitelistBulk(address[] calldata _addresses) public onlyOwner {
         for (uint i=0; i<_addresses.length; i++) {
             whitelist(_addresses[i]);
         }

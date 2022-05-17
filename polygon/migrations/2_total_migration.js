@@ -46,7 +46,7 @@ module.exports = async (deployer, network, accounts) => {
             console.log('token contract address: ', token.address);
             break;
         case 'nft':
-            const result = await deployer.deploy(CptcNFTCollection, { gas: 6000000, from: accounts[0] });
+            const result = await deployer.deploy(CptcNFTCollection, 'CptcNFTTest', 'CptcNFTTest', { gas: 6000000, from: accounts[0] });
             nft = result;
             console.log('nft contract address: ', nft.address);
             console.log('nft contract owner: ', accounts[0]);
