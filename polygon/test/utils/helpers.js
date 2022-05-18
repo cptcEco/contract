@@ -1,9 +1,6 @@
 const BN = require('bn.js');
 const { expectRevert } = require('@openzeppelin/test-helpers');
-const ethers = require('ethers')
 
-
-const toUnit = v => ethers.utils.parseUnits(v.toString());
 
 const send = (web3, payload) => {
 	if (!payload.jsonrpc) payload.jsonrpc = '2.0';
@@ -35,7 +32,7 @@ const currentTime = async (web3) => {
  *  Increases the time in the EVM.
  *  @param seconds Number of seconds to increase the time by
  */
- const fastForward = async (web3, seconds) => {
+const fastForward = async (web3, seconds) => {
 	// It's handy to be able to be able to pass big numbers in as we can just
 	// query them from the contract, then send them back. If not changed to
 	// a number, this causes much larger fast forwards than expected without error.
@@ -52,15 +49,14 @@ const currentTime = async (web3) => {
 	await mineBlock(web3);
 };
 
-
-async function onlyGivenAddressCanInvoke({
+const onlyGivenAddressCanInvoke = async ({
     fnc,
     args,
     accounts,
     address = undefined,
     reason = undefined,
     skipPassCheck = false
-}) {
+}) => {
     for (const user of accounts) {
         if (user.toLowerCase() === address.toLowerCase()) {
             continue;
@@ -88,4 +84,5 @@ const takeSnapshot = async (web3) => {
     return result;
 };
 
-module.exports = { toUnit, fastForward, onlyGivenAddressCanInvoke, currentTime, takeSnapshot, restoreSnapshot }
+
+module.exports = { fastForward, onlyGivenAddressCanInvoke, currentTime, takeSnapshot, restoreSnapshot }

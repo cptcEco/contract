@@ -1,18 +1,32 @@
-const BN = require('bn.js');
-const Web3 = require('web3');
 const ethers = require('ethers');
-const { assert, expect } = require('chai');
+const { assert } = require('chai');
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
-const IERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/IERC20.sol");
-const StakingRewards = artifacts.require('StakingRewards')
+const { web3 } = require('@openzeppelin/test-helpers/src/setup');
+const { ecsign } = require('ethereumjs-util');
 
-const { toUnit, onlyGivenAddressCanInvoke, fastForward, currentTime, takeSnapshot, restoreSnapshot } = require('./utils');
+const constants = require('../constants.json');
+const {
+	expandTo18Decimals,
+	toUnit,
+	getApprovalDigest
+} = require('./utils/encoders')
+const {
+	onlyGivenAddressCanInvoke, 
+	fastForward, 
+	currentTime, 
+	takeSnapshot, 
+	restoreSnapshot
+} = require('./utils/helpers')
+
+const IERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/IERC20.sol");
+const StakingRewards = artifacts.require('StakingRewards');
+const IUniswapV2ERC20 = artifacts.require('IUniswapV2ERC20');
 
 
 contract('StakingRewards contract testing', async (accounts) => {
-    const wealthyAddress = '0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7';
-    const pairTokenAddress = '0x7Cf69af2a017452754f7fBbc36D4a12cc5Bc631B'
-    const rewardsTokenAddress = '0x0a97853c72cB28C98B3112AE45215391675CAc43'
+    const wealthyAddress = constants.liveWealthyAddress;
+    const pairTokenAddress = constants.livePairTokenAddress;
+    const rewardsTokenAddress = constants.liveTokenAddress
     const DAY = 86400;
     const ZERO_BN = ethers.BigNumber.from('0')
 
@@ -23,7 +37,7 @@ contract('StakingRewards contract testing', async (accounts) => {
 
     before(async () => {
         stakingRewards = await StakingRewards.deployed();
-        stakingToken = await IERC20.at(pairTokenAddress)
+        stakingToken = await IUniswapV2ERC20.at(pairTokenAddress)
         rewardsToken = await IERC20.at(rewardsTokenAddress)
     });
 
@@ -125,6 +139,53 @@ contract('StakingRewards contract testing', async (accounts) => {
 
 			const postStakeBal = await stakingRewards.balanceOf(stakingAccount1);
 			const postLpBal = await stakingToken.balanceOf(stakingAccount1);
+
+			assert.isTrue(postLpBal.lt(initialLpBal));
+			assert.isTrue(postStakeBal.gt(initialStakeBal));
+		});
+
+		it('cannot stake 0', async () => {
+			await expectRevert(stakingRewards.stake('0'), 'Cannot stake 0');
+		});
+	});
+
+	describe('stakeWithPermit()', () => {
+		it('should work using sign', async () => {
+			const totalToStake = expandTo18Decimals(2);
+
+			const ownerPrivateKey = '0x02b39cac1532bef9dba3e36ec32d3de1e9a88f1dda597d3ac6e2130aed9adc4e'
+			const ownerAddress = accounts[0]
+
+			await stakingToken.transfer(ownerAddress, totalToStake, { from: wealthyAddress });
+
+			const initialStakeBal = await stakingRewards.balanceOf(ownerAddress);
+			const initialLpBal = await stakingToken.balanceOf(ownerAddress);
+
+			// get permit
+			const nonce = (await stakingToken.nonces(ownerAddress)).toNumber()
+			const deadline = ethers.constants.MaxUint256
+			const digest = await getApprovalDigest(
+			  stakingToken,
+			  { owner: ownerAddress, spender: stakingRewards.address, value: totalToStake },
+			  nonce,
+			  deadline,
+			  await web3.eth.net.getId()
+			)
+			
+			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(ownerPrivateKey.slice(2), 'hex'))
+
+	        const receipt = await stakingRewards.stakeWithPermit(
+				totalToStake,
+	            deadline,
+	            v,
+	            r,
+	            s,
+	            { from: ownerAddress }
+	        );
+			await expectEvent(receipt, 'Staked');
+
+			const postStakeBal = await stakingRewards.balanceOf(ownerAddress);
+			const postLpBal = await stakingToken.balanceOf(ownerAddress);
 
 			assert.isTrue(postLpBal.lt(initialLpBal));
 			assert.isTrue(postStakeBal.gt(initialStakeBal));
@@ -254,13 +315,16 @@ contract('StakingRewards contract testing', async (accounts) => {
 			const initialStakingTokenBal = await stakingToken.balanceOf(stakingAccount1);
 			const initialStakeBal = await stakingRewards.balanceOf(stakingAccount1);
 
+			assert.equal(totalToStake.toString(), initialStakeBal.toString());
+			assert.equal(initialStakingTokenBal.toString(), '0')
+
 			await stakingRewards.withdraw(totalToStake, { from: stakingAccount1 });
 
 			const postStakingTokenBal = await stakingToken.balanceOf(stakingAccount1);
 			const postStakeBal = await stakingRewards.balanceOf(stakingAccount1);
 
             assert.equal(postStakeBal.toString(), '0')
-			assert.equal(totalToStake.toString(), initialStakeBal.toString());
+			assert.equal(postStakingTokenBal.toString(), initialStakeBal.toString())
 		});
 
 		it('cannot withdraw 0', async () => {

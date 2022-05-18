@@ -8,7 +8,7 @@ var CptcToken = artifacts.require('CptcToken');
 var hub;
 var token;
 
-contract.skip('Hub contract testing', async (accounts) => {
+contract('Hub contract testing', async (accounts) => {
     before(async () => {
         // Get contracts used in hook
         hub = await CptcHub.deployed();

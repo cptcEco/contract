@@ -1,8 +1,10 @@
 require('dotenv').config({ path: `${__dirname}/../../.env` });
 
-var CptcToken = artifacts.require('CptcToken');
-var CptcHub = artifacts.require('CptcHub');
-var StakingRewards = artifacts.require('StakingRewards')
+const CptcToken = artifacts.require('CptcToken');
+const CptcHub = artifacts.require('CptcHub');
+const StakingRewards = artifacts.require('StakingRewards');
+
+const constants = require('../constants.json');
 
 module.exports = async (deployer, network, accounts) => {
     let hub;
@@ -10,7 +12,6 @@ module.exports = async (deployer, network, accounts) => {
 
     switch (network) {
     case 'test':
-
         await deployer.deploy(CptcHub, { gas: 6000000, from: accounts[0] })
             .then((result) => {
                 hub = result;
@@ -19,6 +20,14 @@ module.exports = async (deployer, network, accounts) => {
 
         token = await deployer.deploy(CptcToken, hub.address, accounts[1]);
         await hub.setContractAddress('Token', token.address, '3');
+        
+        await deployer.deploy(
+            StakingRewards,
+            constants.liveWealthyAddress,
+            constants.liveTokenAddress,
+            constants.livePairTokenAddress,
+            { gas: 6000000, from: constants.liveWealthyAddress }
+        )
 
         break;
     case 'ganache':
@@ -32,17 +41,6 @@ module.exports = async (deployer, network, accounts) => {
         token = await deployer.deploy(CptcToken, hub.address, ownerAddress);
         await hub.setContractAddress('Token', token.address, '3');
         console.log('token address: ', token.address);
-        break;
-    case 'polygonFork':
-        const tokenAddress = '0x0a97853c72cB28C98B3112AE45215391675CAc43'
-        const pairTokenAddress = '0x7Cf69af2a017452754f7fBbc36D4a12cc5Bc631B'
-        await deployer.deploy(
-            StakingRewards,
-            '0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7',
-            tokenAddress,
-            pairTokenAddress,
-            { gas: 6000000, from: '0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7' }
-        )
         break;
     case 'mumbai':
         await deployer.deploy(CptcHub, { gas: 6000000, from: accounts[0] })
