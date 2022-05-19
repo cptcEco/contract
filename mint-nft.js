@@ -2,7 +2,7 @@ const fs = require('fs');
 const Web3 = require('web3');
 require('dotenv').config({ path: `./.env` });
 
-const NFT_ADDRESS = '0xB6479a983576867eaC4b09cAF18FF8E2bE223EBD';
+const NFT_ADDRESS = '0xb8424Be5b66A79c493f2B25299A5535CEa4A20C9';
 
 // initialize web3
 const web3 = new Web3(new Web3.providers.HttpProvider(process.env.MUMBAI_ACCESS_KEY));
@@ -17,7 +17,7 @@ const nftContract = new web3.eth.Contract(
 class NftTest {
 
     async getNftUrl(nftId) {
-        const nftUrl = await nftContract.tokenURI(nftId);
+        const nftUrl = await nftContract.methods.tokenURI(nftId).call();
 
         console.log('NFT url: ', nftUrl);
     }
@@ -108,7 +108,7 @@ class NftTest {
 const nftTest = new NftTest();
 // nftTest.getNftUrl(1);
 //nftTest.mint('ipfs://QmSR9ScrV23KMRMDNJr895QFEzdAVNBpt2dNDvgk6Zw7fb');
-
-nftTest.startPresale();
+// nftTest.getPresalePrice();
+// nftTest.startPresale();
 // nftTest.whitelist(process.env.NFT_WHITELIST_ACC_PUBLIC);
 // nftTest.mint(process.env.NFT_WHITELIST_ACC_PUBLIC, process.env.NFT_WHITELIST_ACC_PRIVATE, 1);

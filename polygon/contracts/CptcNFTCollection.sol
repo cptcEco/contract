@@ -107,7 +107,7 @@ contract CptcNFTCollection is ERC721URIStorage, Ownable {
         require(amount <= _preSaleLimitPerUser, "CptcNFTCollection: mint limit per user reached!");
         require(_currentTokenId.current() + amount < _collectionSize, "CptcNFTCollection: not enough tokens left for minting!");
 
-        paymentReceivingAccount.transfer(msg.value);
+        paymentReceivingAccount.transfer(_preSaleTokenPrice * amount);
 
         for (uint i=0; i<amount; i++) {
             _currentTokenId.increment();
