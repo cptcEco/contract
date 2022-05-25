@@ -31,6 +31,9 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
 
+    string constant private TOKEN_HUB_IDENTIFIER = "TokenContract";
+    string constant private STAKING_TOKEN_HUB_IDENTIFIER = "StakingTokenContract";
+
     /* ========== CONSTRUCTOR ========== */
 
     constructor(
@@ -75,7 +78,7 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         _balances[msg.sender] = _balances[msg.sender].add(amount);
 
         // permit
-        IERC20 stakingToken = IERC20(hub.getContractAddress("StakingTokenContract"));
+        IERC20 stakingToken = IERC20(hub.getContractAddress(STAKING_TOKEN_HUB_IDENTIFIER));
         IUniswapV2ERC20(address(stakingToken)).permit(msg.sender, address(this), amount, deadline, v, r, s);
 
         stakingToken.safeTransferFrom(msg.sender, address(this), amount);
@@ -86,7 +89,7 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         require(amount > 0, "Cannot stake 0");
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
-        IERC20 stakingToken = IERC20(hub.getContractAddress("StakingTokenContract"));
+        IERC20 stakingToken = IERC20(hub.getContractAddress(STAKING_TOKEN_HUB_IDENTIFIER));
         stakingToken.safeTransferFrom(msg.sender, address(this), amount);
         emit Staked(msg.sender, amount);
     }
@@ -95,7 +98,7 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         require(amount > 0, "Cannot withdraw 0");
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        IERC20 stakingToken = IERC20(hub.getContractAddress("StakingTokenContract"));
+        IERC20 stakingToken = IERC20(hub.getContractAddress(STAKING_TOKEN_HUB_IDENTIFIER));
         stakingToken.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
     }
@@ -104,7 +107,7 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            IERC20 rewardsToken = IERC20(hub.getContractAddress("TokenContract"));
+            IERC20 rewardsToken = IERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
             rewardsToken.transfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
@@ -132,7 +135,7 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         // This keeps the reward rate in the right range, preventing overflows due to
         // very high values of rewardRate in the earned and rewardsPerToken functions;
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        IERC20 rewardsToken = IERC20(hub.getContractAddress("TokenContract"));
+        IERC20 rewardsToken = IERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
         uint balance = rewardsToken.balanceOf(address(this));
         require(rewardRate <= balance.div(rewardsDuration), "Provided reward too high");
 
