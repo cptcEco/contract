@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IStakingRewards.sol";
 import "./interfaces/IUniswapV2ERC20.sol";
-import {CptcHub} from "./CptcHub.sol";
+import "./CptcHub.sol";
 
 contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
     using SafeMath for uint256;
