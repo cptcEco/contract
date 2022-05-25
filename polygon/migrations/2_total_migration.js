@@ -19,13 +19,13 @@ module.exports = async (deployer, network, accounts) => {
         // await hub.setContractAddress('Owner', accounts[0], '0');
 
         token = await deployer.deploy(CptcToken, hub.address, accounts[1]);
-        await hub.setContractAddress('Token', token.address, '3');
+        await hub.setContractAddress('TokenContract', constants.liveTokenAddress, '3');
+        await hub.setContractAddress('StakingTokenContract', constants.livePairTokenAddress, '3');
+        await hub.setContractAddress('RewardsDistribution', constants.liveWealthyAddress, '3')
         
         await deployer.deploy(
             StakingRewards,
-            constants.liveWealthyAddress,
-            constants.liveTokenAddress,
-            constants.livePairTokenAddress,
+            hub.address,
             { gas: 6000000, from: constants.liveWealthyAddress }
         )
 
@@ -39,7 +39,7 @@ module.exports = async (deployer, network, accounts) => {
         // await hub.setContractAddress('Owner', accounts[0], '0');
         const ownerAddress = '0x8A7DEDbED3fD420886d3CA6EE3b629fbff1e1E35';
         token = await deployer.deploy(CptcToken, hub.address, ownerAddress);
-        await hub.setContractAddress('Token', token.address, '3');
+        await hub.setContractAddress('TokenContract', token.address, '3');
         console.log('token address: ', token.address);
         break;
     case 'mumbai':

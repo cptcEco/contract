@@ -49,20 +49,6 @@ contract('StakingRewards contract testing', async (accounts) => {
         await restoreSnapshot(web3, lastSnapshotId);
     });
 
-    describe('Constructor & Settings', async () => {
-        it('should set rewards token on constructor', async () => {
-			assert.equal(await stakingRewards.rewardsToken(), rewardsToken.address);
-		});
-
-		it('should set staking token on constructor', async () => {
-			assert.equal(await stakingRewards.stakingToken(), stakingToken.address);
-		});
-
-        it('should set distribution address on constructor', async () => {
-			assert.equal((await stakingRewards.rewardsDistribution()).toLowerCase(), wealthyAddress.toLowerCase());
-		});
-    })
-
     describe('Function permissions', () => {
 		const rewardValue = toUnit(1.0);
 
