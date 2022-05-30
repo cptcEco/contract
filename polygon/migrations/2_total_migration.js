@@ -1,7 +1,11 @@
 require('dotenv').config({ path: `${__dirname}/../../.env` });
 
-var CptcToken = artifacts.require('CptcToken');
-var CptcHub = artifacts.require('CptcHub');
+const CptcToken = artifacts.require('CptcToken');
+const CptcHub = artifacts.require('CptcHub');
+const StakingRewards = artifacts.require('StakingRewards');
+const UniswapV2ERC20 = artifacts.require('UniswapV2ERC20');
+
+const constants = require('../constants.json');
 
 module.exports = async (deployer, network, accounts) => {
     let hub;
@@ -9,7 +13,6 @@ module.exports = async (deployer, network, accounts) => {
 
     switch (network) {
     case 'test':
-
         await deployer.deploy(CptcHub, { gas: 6000000, from: accounts[0] })
             .then((result) => {
                 hub = result;
@@ -17,7 +20,15 @@ module.exports = async (deployer, network, accounts) => {
         // await hub.setContractAddress('Owner', accounts[0], '0');
 
         token = await deployer.deploy(CptcToken, hub.address, accounts[1]);
-        await hub.setContractAddress('Token', token.address, '3');
+        await hub.setContractAddress('TokenContract', constants.liveTokenAddress, '3');
+        await hub.setContractAddress('StakingTokenContract', constants.livePairTokenAddress, '3');
+        await hub.setContractAddress('RewardsDistribution', constants.liveWealthyAddress, '3')
+        
+        await deployer.deploy(
+            StakingRewards,
+            hub.address,
+            { gas: 6000000, from: constants.liveWealthyAddress }
+        )
 
         break;
     case 'ganache':
@@ -29,7 +40,7 @@ module.exports = async (deployer, network, accounts) => {
         // await hub.setContractAddress('Owner', accounts[0], '0');
         const ownerAddress = '0x8A7DEDbED3fD420886d3CA6EE3b629fbff1e1E35';
         token = await deployer.deploy(CptcToken, hub.address, ownerAddress);
-        await hub.setContractAddress('Token', token.address, '3');
+        await hub.setContractAddress('TokenContract', token.address, '3');
         console.log('token address: ', token.address);
         break;
     case 'mumbai':
@@ -42,6 +53,21 @@ module.exports = async (deployer, network, accounts) => {
         const mumbai_initialMintPublicKey = process.env.MUMBAI_INITIAL_MINT_PUBLIC_KEY;
         token = await deployer.deploy(CptcToken, hub.address, mumbai_initialMintPublicKey);
         console.log('token contract address: ', token.address);
+
+        await hub.setContractAddress('TokenContract', constants.mumbaiTokenAddress, '3');
+        await hub.setContractAddress('StakingTokenContract', constants.mumbaiPairTokenAddress, '3');
+        await hub.setContractAddress('RewardsDistribution', constants.mumbaiWealthyAddress, '3')
+
+        await deployer.deploy(UniswapV2ERC20, { gas: 6000000, from: accounts[0] })
+        const pair = await UniswapV2ERC20.deployed()
+        console.log(pair, pair.address)
+        await deployer.deploy(
+            StakingRewards,
+            constants.mumbaiHubAddress,
+            { gas: 6000000, from: accounts[0] }
+        ) 
+        const stakingContract = await StakingRewards.deployed()
+        console.log('stakingRewards contract address: ', stakingContract.address)
         break;
     case 'live':
         // this is deployer address for hub contract

@@ -20,7 +20,6 @@ module.exports = {
             },
         },
     },
-
     networks: {
         ganache: {
             host: '127.0.0.1',
@@ -28,12 +27,11 @@ module.exports = {
             gas: 6000000,
             network_id: '5777',
         },
-
         test: {
             host: '127.0.0.1',
             port: 7545,
             gas: 6000000,
-            network_id: '1337',
+            network_id: '137',
         },
         mumbai: {
             host: mumbai_rpcEndpoint, // Connect to geth on the specified
@@ -43,7 +41,6 @@ module.exports = {
             timeoutBlocks: 200,
             skipDryRun: true
         },
-
         live: {
             host: live_rpcEndpoint,
             provider: () => new HDWalletProvider([private_key], live_rpcEndpoint, 0, 1),
@@ -52,6 +49,5 @@ module.exports = {
             timeoutBlocks: 200,
             skipDryRun: true
         },
-
     },
 };

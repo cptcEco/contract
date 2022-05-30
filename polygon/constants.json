@@ -1,0 +1,9 @@
+{
+    "liveTokenAddress": "0x0a97853c72cB28C98B3112AE45215391675CAc43",
+    "livePairTokenAddress": "0x7Cf69af2a017452754f7fBbc36D4a12cc5Bc631B",
+    "liveWealthyAddress": "0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7",
+    "mumbaiTokenAddress": "0xe32E112aeA7a48992344c472889e1045dcB95551",
+    "mumbaiPairTokenAddress": "0x3829DC4b976B7fD8F4B6e2b8681505Ec1979b728",
+    "mumbaiWealthyAddress": "0x6b0B870f5ba3f8C6f35744b9f313DdED1b506914",
+    "mumbaiHubAddress": "0xace95320F30cd2652A26Ef58132F5c4321d4eE46"
+}
