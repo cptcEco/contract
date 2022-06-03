@@ -7,7 +7,7 @@ contract Airdrop {
     event TokensDropped(address[] recipients, uint256[] amounts);
     event TokensWithdrawn(address beneficiary, uint256 balance);
 
-    function dropTokens(address _cptc, address[] memory _recipients, uint256[] memory _amounts) internal {
+    function _dropTokens(address _cptc, address[] memory _recipients, uint256[] memory _amounts) internal {
         IERC20 token = IERC20(_cptc);
 
         for (uint i = 0; i < _recipients.length; i++) {
@@ -18,7 +18,7 @@ contract Airdrop {
         emit TokensDropped(_recipients, _amounts);
     }
 
-    function withdrawTokens(address _cptc, address _beneficiary) internal {
+    function _withdrawTokens(address _cptc, address _beneficiary) internal {
         IERC20 token = IERC20(_cptc);
         uint balance = token.balanceOf(address(this));
         

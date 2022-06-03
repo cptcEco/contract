@@ -18,7 +18,7 @@ contract Converter {
         paymentToken = _paymentToken;
     }
 
-    function convertERC20(address _cptc) internal {
+    function _convertERC20(address _cptc) internal {
         uint amountIn = IERC20(paymentToken).balanceOf(address(this));
         require(amountIn > 0, "No token balance to convert");
 
@@ -51,7 +51,7 @@ contract Converter {
         emit TokenConverted(amounts);
     }
 
-    function convertNativeCurrency(address _cptc) internal {
+    function _convertNativeCurrency(address _cptc) internal {
         uint amountIn = address(this).balance;
         require(amountIn > 0, "No native currency balance to convert");
 

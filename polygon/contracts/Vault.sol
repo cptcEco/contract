@@ -25,23 +25,23 @@ contract Vault is IVault, Ownable, Airdrop, Converter {
         transferOwnership(_owner);
     }
 
-    function dropTokens(address[] memory _recipients, uint256[] memory _amounts) external onlyOwner {
-        Airdrop.dropTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _recipients, _amounts);
+    function dropTokens(address[] memory _recipients, uint256[] memory _amounts) external override onlyOwner {
+        Airdrop._dropTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _recipients, _amounts);
     }
 
-    function withdrawTokens(address _beneficiary) external onlyOwner {
-        Airdrop.withdrawTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _beneficiary);
+    function withdrawTokens(address _beneficiary) external onlyOwner override {
+        Airdrop._withdrawTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _beneficiary);
     }
 
-    function convertERC20() external {
-        Converter.convertERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
+    function convertERC20() external override {
+        Converter._convertERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
     }
 
-    function convertNativeCurrency() external {
-        Converter.convertNativeCurrency(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
+    function convertNativeCurrency() external override {
+        Converter._convertNativeCurrency(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
     }
 
-    function setHubAddress(address newHubAddress) external onlyOwner {
+    function setHubAddress(address newHubAddress) external override onlyOwner {
         hub = CptcHub(newHubAddress);
         emit HubAddressModified(newHubAddress);
     }
