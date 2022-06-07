@@ -1,32 +1,24 @@
 const ethers = require('ethers');
 const { expect, assert } = require('chai');
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
-const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 
 const constants = require('../constants.json');
+const { toUnit } = require('./utils/encoders')
 const {
-	expandTo18Decimals,
-	toUnit,
-	getApprovalDigest
-} = require('./utils/encoders')
-const {
-	onlyGivenAddressCanInvoke, 
-	fastForward, 
-	currentTime, 
 	takeSnapshot, 
-	restoreSnapshot
-} = require('./utils/helpers')
+	restoreSnapshot,
+    mineBlock
+} = require('./utils/helpers');
+const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 
 const IERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/IERC20.sol");
 const CptcHub = artifacts.require('CptcHub');
 const IUniswapV2Router02 = artifacts.require('IUniswapV2Router02');
-const IWETH = artifacts.require('IWETH');
 const Vault = artifacts.require('Vault');
 
 
 contract('Vault contract testing', async (accounts) => {
     const wealthyAddress = constants.liveWealthyAddress;
-    const DAY = 86400;
     const ZERO_BN = ethers.BigNumber.from('0')
 
     let cptcHub;
@@ -97,25 +89,97 @@ contract('Vault contract testing', async (accounts) => {
             assert.isTrue((await cptc.balanceOf(usdcVault.address)).gt(ZERO_BN));
         });
 
-        it.skip('should convert from native currency (matic)', async () => {
+        it('should convert from native currency (matic)', async () => {
             const maticValue = toUnit(1.0);
 
-            const maticWithdrawInterface = await IWETH.at(constants.liveWMATIC);
-            const tx = await maticWithdrawInterface.withdraw(maticValue, { from: wealthyAddress });
+            await web3.eth.sendTransaction({
+                from: constants.liveMaticWealthyAddress,
+                value: maticValue,
+                to: usdcVault.address
+            });
 
-            const provider = ethers.getDefaultProvider();
-            // await expect((await provider.getBalance(wealthyAddress)).toString()).to.equal(maticValue.toString());
-
-            await usdcVault.sendTransaction({ from: wealthyAddress, value: maticValue.toHexString() })
-
-            await expect((await provider.getBalance(usdcVault.address)).toString()).to.equal(maticValue.toString());
+            await mineBlock(web3);
+            await expect((await web3.eth.getBalance(usdcVault.address)).toString()).to.equal(maticValue.toString());
             await expect((await cptc.balanceOf(usdcVault.address)).toString()).to.equal(ZERO_BN.toString());
 
             const receipt = await usdcVault.convertNativeCurrency();
             await expectEvent(receipt, 'NativeCurrencyConverted');
 
-            await expect((await provider.getBalance(wealthyAddress)).toString()).to.equal(ZERO_BN.toString());
             assert.isTrue((await cptc.balanceOf(usdcVault.address)).gt(ZERO_BN));
         });
 	});
+
+    describe('Airdrop/withdraw tokens', () => {
+		it('should convert from wmatic and drop tokens for all accounts', async () => {
+            const wmaticValue = toUnit(1.0);
+
+            const transferReceipt = await wmatic.transfer(wmaticVault.address, wmaticValue, { from: wealthyAddress });
+            await expectEvent(transferReceipt, 'Transfer');
+            await expect((await wmatic.balanceOf(wmaticVault.address)).toString()).to.equal(wmaticValue.toString());
+            await expect((await cptc.balanceOf(wmaticVault.address)).toString()).to.equal(ZERO_BN.toString());
+
+            const receipt = await wmaticVault.convertERC20();
+            await expectEvent(receipt, 'TokenConverted');
+
+            await expect((await wmatic.balanceOf(wmaticVault.address)).toString()).to.equal(ZERO_BN.toString());
+            
+            const cptcValue = await cptc.balanceOf(wmaticVault.address);
+            assert.isTrue(cptcValue.gt(ZERO_BN));
+            
+            const dropAddresses = [];
+            for (account of accounts) {
+                if ((await cptc.balanceOf(account)).toString() === ZERO_BN.toString()) {
+                    dropAddresses.push(account)
+                }
+            }
+            
+            const dropValue = ethers.BigNumber.from(cptcValue.toString()).div(ethers.BigNumber.from(100));
+            const dropReceipt = await wmaticVault.dropTokens(dropAddresses, dropAddresses.map((_) => dropValue), { from: wealthyAddress });
+            await expectEvent(dropReceipt, 'TokensDropped');
+            for (account of dropAddresses) {
+                await expect((await cptc.balanceOf(account)).toString()).to.equal(dropValue.toString());
+            }
+		});
+
+        it('should convert from wmatic and withdraw all tokens', async () => {
+            const wmaticValue = toUnit(1.0);
+
+            const transferReceipt = await wmatic.transfer(wmaticVault.address, wmaticValue, { from: wealthyAddress });
+            await expectEvent(transferReceipt, 'Transfer');
+            await expect((await wmatic.balanceOf(wmaticVault.address)).toString()).to.equal(wmaticValue.toString());
+            await expect((await cptc.balanceOf(wmaticVault.address)).toString()).to.equal(ZERO_BN.toString());
+
+            const receipt = await wmaticVault.convertERC20();
+            await expectEvent(receipt, 'TokenConverted');
+
+            await expect((await wmatic.balanceOf(wmaticVault.address)).toString()).to.equal(ZERO_BN.toString());
+            
+            const cptcValue = await cptc.balanceOf(wmaticVault.address);
+            assert.isTrue(cptcValue.gt(ZERO_BN));
+            const cptcWithdrawValue = ethers.BigNumber.from(cptcValue.toString());
+
+            const beneficiary = accounts[0];
+            const previousBalance = ethers.BigNumber.from((await cptc.balanceOf(beneficiary)).toString());
+            
+            const withdrawReceipt = await wmaticVault.withdrawTokens(beneficiary, { from: wealthyAddress });
+            await expectEvent(withdrawReceipt, 'TokensWithdrawn');
+            
+            const afterBalance = ethers.BigNumber.from((await cptc.balanceOf(beneficiary)).toString());
+            await expect(previousBalance.add(cptcWithdrawValue).toString()).to.equal(afterBalance.toString());
+		});
+	});
+
+    describe('setHubAddress', () => {
+        it('should not be able to change address because not owner', async () => {
+            const newCptcHub = await CptcHub.new();
+            await expectRevert(wmaticVault.setHubAddress(newCptcHub.address, { from: accounts[1] }), "Ownable: caller is not the owner");
+        });
+
+		it('should change the address of Hub to a new CptcHub', async () => {
+			const newCptcHub = await CptcHub.new();
+            const receipt = await wmaticVault.setHubAddress(newCptcHub.address, { from: wealthyAddress });
+            await expectEvent(receipt, 'HubAddressModified');
+		});
+	});
+
 });

@@ -85,4 +85,4 @@ const takeSnapshot = async (web3) => {
 };
 
 
-module.exports = { fastForward, onlyGivenAddressCanInvoke, currentTime, takeSnapshot, restoreSnapshot }
+module.exports = { fastForward, onlyGivenAddressCanInvoke, currentTime, takeSnapshot, restoreSnapshot, mineBlock }
