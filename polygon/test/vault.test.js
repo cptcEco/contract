@@ -37,8 +37,10 @@ contract('Vault contract testing', async (accounts) => {
         wmatic = await IERC20.at(constants.liveWMATIC);
         cptc = await IERC20.at(constants.liveTokenAddress);
 
-        wmaticVault = await Vault.new(wealthyAddress, cptcHub.address, sushiRouter.address, wmatic.address);
-        usdcVault = await Vault.new(wealthyAddress, cptcHub.address, sushiRouter.address, usdc.address)
+        wmaticVault = await Vault.new({ from: wealthyAddress });
+        usdcVault = await Vault.new({ from: wealthyAddress });
+        await wmaticVault.initialize(wealthyAddress, cptcHub.address, sushiRouter.address, wmatic.address, { from: wealthyAddress });
+        await usdcVault.initialize(wealthyAddress, cptcHub.address, sushiRouter.address, usdc.address, { from: wealthyAddress });
     });
 
     beforeEach(async () => {

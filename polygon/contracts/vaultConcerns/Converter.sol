@@ -7,13 +7,13 @@ import '../interfaces/IUniswapV2Router02.sol';
 import '../interfaces/IUniswapV2Pair.sol';
 
 contract Converter {
-    address immutable public paymentToken;
-    address immutable public sushiRouter;
+    address public paymentToken;
+    address public sushiRouter;
 
     event TokenConverted(uint256[] amounts);
     event NativeCurrencyConverted(uint256[] amounts);
 
-    constructor(address _sushiRouter, address _paymentToken) {
+    function initialize(address _sushiRouter, address _paymentToken) internal {
         sushiRouter = _sushiRouter;
         paymentToken = _paymentToken;
     }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./CptcHub.sol";
 import "./vaultConcerns/Airdrop.sol";
@@ -9,20 +10,29 @@ import "./vaultConcerns/Converter.sol";
 import "./interfaces/IVault.sol";
 
 
-contract Vault is IVault, Ownable, Airdrop, Converter {
+contract Vault is IVault, Ownable, Initializable, Airdrop, Converter {
     CptcHub public hub;
     string constant private TOKEN_HUB_IDENTIFIER = "TokenContract";
+    address immutable public factory;
 
-    constructor(
+    modifier onlyFactory() {
+        require(factory == _msgSender(), "Caller is not the factory");
+        _;
+    }
+
+    constructor() {
+        factory = msg.sender;
+    }
+
+    function initialize(
         address _owner,
         address _cptcHub,
         address _sushiRouter,
         address _paymentToken
-    ) 
-        Converter(_sushiRouter, _paymentToken)
-    {
+    ) external onlyFactory initializer override {
         hub = CptcHub(_cptcHub);
         transferOwnership(_owner);
+        Converter.initialize(_sushiRouter, _paymentToken);
     }
 
     function dropTokens(address[] memory _recipients, uint256[] memory _amounts) external override onlyOwner {
@@ -44,6 +54,10 @@ contract Vault is IVault, Ownable, Airdrop, Converter {
     function setHubAddress(address newHubAddress) external override onlyOwner {
         hub = CptcHub(newHubAddress);
         emit HubAddressModified(newHubAddress);
+    }
+
+    function destroy() external override onlyFactory {
+        selfdestruct(payable(owner()));
     }
 }
 
