@@ -35,12 +35,30 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter {
         Converter.initialize(_sushiRouter, _paymentToken);
     }
 
-    function dropTokens(address[] memory _recipients, uint256[] memory _amounts) external override onlyOwner {
+    /**
+     * @dev Transfers set amount of tokens to recipients
+     */
+    function dropTokens(address[] calldata _recipients, uint256[] calldata _amounts) external override onlyOwner {
         Airdrop._dropTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _recipients, _amounts);
     }
 
+    function assignTokens(address[] calldata _recipients, uint256[] calldata _amounts) external override onlyOwner {
+        Airdrop._assignTokens(_recipients, _amounts);
+    }
+
+    function claimTokens(uint256 amount) external override {
+        Airdrop._claimTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), amount);
+    }
+
+    /**
+     * @dev Withdraws all funds from contract
+     */
     function withdrawTokens(address _beneficiary) external onlyOwner override {
-        Airdrop._withdrawTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _beneficiary);
+        IERC20 token = IERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
+        uint balance = token.balanceOf(address(this));
+        
+        require(token.transfer(_beneficiary, balance));
+        emit TokensWithdrawn(_beneficiary, balance);
     }
 
     function convertERC20() external override {
