@@ -13,7 +13,7 @@ contract Converter {
     event TokenConverted(uint256[] amounts);
     event NativeCurrencyConverted(uint256[] amounts);
 
-    function initialize(address _sushiRouter, address _paymentToken) internal {
+    function _initialize(address _sushiRouter, address _paymentToken) internal {
         sushiRouter = _sushiRouter;
         paymentToken = _paymentToken;
     }

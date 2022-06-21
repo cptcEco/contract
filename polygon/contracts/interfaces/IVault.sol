@@ -9,9 +9,13 @@ interface IVault {
 
     function dropTokens(address[] calldata _recipients, uint256[] calldata _amounts) external;
 
-    function assignTokens(address[] calldata _recipients, uint256[] calldata _amounts) external;
-
-    function claimTokens(uint256 amount) external;
+    function claimAirdrop(
+        uint256 _groupId,
+        uint256 _index,
+        address _account,
+        uint256 _amount,
+        bytes32[] calldata _merkleProof
+    ) external;
 
     function withdrawTokens(address _beneficiary) external;
 

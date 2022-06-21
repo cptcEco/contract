@@ -169,40 +169,9 @@ contract('Vault contract testing', async (accounts) => {
             const afterBalance = ethers.BigNumber.from((await cptc.balanceOf(beneficiary)).toString());
             await expect(previousBalance.add(cptcWithdrawValue).toString()).to.equal(afterBalance.toString());
 		});
-
-        it('should assign tokens to recipients and then successfully claim', async () => {
-            const wmaticValue = toUnit(1.0);
-
-            const transferReceipt = await wmatic.transfer(wmaticVault.address, wmaticValue, { from: wealthyAddress });
-            await expectEvent(transferReceipt, 'Transfer');
-            await expect((await wmatic.balanceOf(wmaticVault.address)).toString()).to.equal(wmaticValue.toString());
-            await expect((await cptc.balanceOf(wmaticVault.address)).toString()).to.equal(ZERO_BN.toString());
-
-            const receipt = await wmaticVault.convertERC20();
-            await expectEvent(receipt, 'TokenConverted');
-
-            await expect((await wmatic.balanceOf(wmaticVault.address)).toString()).to.equal(ZERO_BN.toString());
-            
-            const cptcValue = await cptc.balanceOf(wmaticVault.address);
-            assert.isTrue(cptcValue.gt(ZERO_BN));
-            
-            const assignAddresses = [];
-            for (account of accounts) {
-                if ((await cptc.balanceOf(account)).toString() === ZERO_BN.toString()) {
-                    assignAddresses.push(account)
-                }
-            }
-            
-            const assignValue = ethers.BigNumber.from(cptcValue.toString()).div(ethers.BigNumber.from(100));
-            const assignReceipt = await wmaticVault.assignTokens(assignAddresses, assignAddresses.map((_) => assignValue), { from: wealthyAddress });
-            await expectEvent(assignReceipt, 'TokensAssigned');
-            for (account of assignAddresses) {
-                const claimReceipt = await wmaticVault.claimTokens(assignValue, { from: account });
-                await expectEvent(claimReceipt, 'Claimed');
-                await expect((await cptc.balanceOf(account)).toString()).to.equal(assignValue.toString());
-            }
-        });
 	});
+
+    
 
     describe('setHubAddress', () => {
         it('should not be able to change address because not owner', async () => {

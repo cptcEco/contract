@@ -7,10 +7,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./CptcHub.sol";
 import "./vaultConcerns/Airdrop.sol";
 import "./vaultConcerns/Converter.sol";
+import "./vaultConcerns/MerkleDistributor.sol";
 import "./interfaces/IVault.sol";
 
 
-contract Vault is IVault, Ownable, Initializable, Airdrop, Converter {
+contract Vault is IVault, Ownable, Initializable, Airdrop, Converter, MerkleDistributor {
     CptcHub public hub;
     string constant private TOKEN_HUB_IDENTIFIER = "TokenContract";
     address immutable public factory;
@@ -32,7 +33,7 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter {
     ) external onlyFactory initializer override {
         hub = CptcHub(_cptcHub);
         transferOwnership(_owner);
-        Converter.initialize(_sushiRouter, _paymentToken);
+        Converter._initialize(_sushiRouter, _paymentToken);
     }
 
     /**
@@ -40,14 +41,6 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter {
      */
     function dropTokens(address[] calldata _recipients, uint256[] calldata _amounts) external override onlyOwner {
         Airdrop._dropTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _recipients, _amounts);
-    }
-
-    function assignTokens(address[] calldata _recipients, uint256[] calldata _amounts) external override onlyOwner {
-        Airdrop._assignTokens(_recipients, _amounts);
-    }
-
-    function claimTokens(uint256 amount) external override {
-        Airdrop._claimTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), amount);
     }
 
     /**
@@ -59,6 +52,26 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter {
         
         require(token.transfer(_beneficiary, balance));
         emit TokensWithdrawn(_beneficiary, balance);
+    }
+
+    /**
+     * @dev Claims airdrop
+     */
+    function claimAirdrop(
+        uint256 _groupId,
+        uint256 _index,
+        address _account,
+        uint256 _amount,
+        bytes32[] calldata _merkleProof
+    ) external override {
+        MerkleDistributor._claim(
+            hub.getContractAddress(TOKEN_HUB_IDENTIFIER),
+            _groupId,
+            _index,
+            _account,
+            _amount,
+            _merkleProof
+        );
     }
 
     function convertERC20() external override {
