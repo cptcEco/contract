@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "truffle:test:polygon": "cd polygon && truffle test --network test",
+    "slither": "slither polygon/contracts --solc-remaps '@openzeppelin=node_modules/@openzeppelin'",
+    "truffle:compile": "cd polygon && truffle compile",
+    "truffle:test:polygon": "cd polygon && truffle test --network test ./test/merkleDistributor.test.js",
     "truffle:deploy:mumbai": "cd polygon && truffle migrate --network mumbai --reset",
-    "truffle:test:mumbai": "cd polygon && truffle test --network mumbai ./test/mumbaiStakingRewards.test.js",
     "truffle:deploy:live": "cd polygon && truffle migrate --network live",
-    "ganache": "ganache-cli --fork https://polygon-mainnet.g.alchemy.com/v2/0mIzYeWBV_FjHlr5FzDfnzDwFiWFN0-d@28462861 --unlock 0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7 -i 999 -p 7545 -l 10000000 -a 30 -m \"aspect ask story desert profit engage tuition leave fade giraffe exclude brief\""
+    "ganache": "ganache-cli --fork https://polygon-mainnet.g.alchemy.com/v2/0mIzYeWBV_FjHlr5FzDfnzDwFiWFN0-d@28462861 --unlock 0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7 --unlock 0x8832924854e3cedb0a6abf372e6ccff9f7654332 -i 999 -p 7545 -l 100000000 -a 30 -m \"aspect ask story desert profit engage tuition leave fade giraffe exclude brief\""
   },
   "dependencies": {
     "@truffle/hdwallet-provider": "^2.0.7",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@openzeppelin/contracts": "^4.5.0",
-    "@openzeppelin/test-helpers": "^0.5.15"
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "ethereum-waffle": "^3.4.4"
   }
 }

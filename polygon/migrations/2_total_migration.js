@@ -4,6 +4,7 @@ const CptcToken = artifacts.require('CptcToken');
 const CptcHub = artifacts.require('CptcHub');
 const StakingRewards = artifacts.require('StakingRewards');
 const UniswapV2ERC20 = artifacts.require('UniswapV2ERC20');
+const VaultFactory = artifacts.require('VaultFactory');
 
 const constants = require('../constants.json');
 
@@ -58,16 +59,26 @@ module.exports = async (deployer, network, accounts) => {
         await hub.setContractAddress('StakingTokenContract', constants.mumbaiPairTokenAddress, '3');
         await hub.setContractAddress('RewardsDistribution', constants.mumbaiWealthyAddress, '3')
 
-        await deployer.deploy(UniswapV2ERC20, { gas: 6000000, from: accounts[0] })
-        const pair = await UniswapV2ERC20.deployed()
-        console.log(pair, pair.address)
         await deployer.deploy(
-            StakingRewards,
+            VaultFactory,
             constants.mumbaiHubAddress,
-            { gas: 6000000, from: accounts[0] }
-        ) 
-        const stakingContract = await StakingRewards.deployed()
-        console.log('stakingRewards contract address: ', stakingContract.address)
+            constants.mumbaiRouter
+        )
+        const factory = await VaultFactory.deployed();
+        console.log('factory contract address: ', factory.address);
+
+        // await deployer.deploy(UniswapV2ERC20, { gas: 6000000, from: accounts[0] })
+        // const pair = await UniswapV2ERC20.deployed()
+        // console.log(pair, pair.address)
+        // await deployer.deploy(
+        //     StakingRewards,
+        //     constants.mumbaiHubAddress,
+        //     { gas: 6000000, from: accounts[0] }
+        // ) 
+        // const stakingContract = await StakingRewards.deployed()
+        // console.log('stakingRewards contract address: ', stakingContract.address)
+
+
         break;
     case 'live':
         // this is deployer address for hub contract

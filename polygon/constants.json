@@ -2,8 +2,15 @@
     "liveTokenAddress": "0x0a97853c72cB28C98B3112AE45215391675CAc43",
     "livePairTokenAddress": "0x7Cf69af2a017452754f7fBbc36D4a12cc5Bc631B",
     "liveWealthyAddress": "0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7",
+    "liveMaticWealthyAddress": "0x8832924854e3cedb0a6abf372e6ccff9f7654332",
+    "liveWMATIC": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    "liveUSDC": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    "liveSushiRouter": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
+    "liveNftCollection": "0x7f792853d848d9FD693925D76B932D6E03e656b8",
     "mumbaiTokenAddress": "0xe32E112aeA7a48992344c472889e1045dcB95551",
     "mumbaiPairTokenAddress": "0x3829DC4b976B7fD8F4B6e2b8681505Ec1979b728",
     "mumbaiWealthyAddress": "0x6b0B870f5ba3f8C6f35744b9f313DdED1b506914",
-    "mumbaiHubAddress": "0xace95320F30cd2652A26Ef58132F5c4321d4eE46"
+    "mumbaiHubAddress": "0xace95320F30cd2652A26Ef58132F5c4321d4eE46",
+    "mumbaiDai": "0xcB1e72786A6eb3b44C2a2429e317c8a2462CFeb1",
+    "mumbaiRouter": "0x8954AfA98594b838bda56FE4C12a09D7739D179b"
 }
