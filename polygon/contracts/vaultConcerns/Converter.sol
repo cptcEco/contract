@@ -18,6 +18,9 @@ contract Converter {
         paymentToken = _paymentToken;
     }
 
+    /**
+     * @dev It uses the sushi router (Uniswap interface though) to swap tokens to CPTC
+     */
     function _convertERC20(address _cptc) internal {
         uint amountIn = IERC20(paymentToken).balanceOf(address(this));
         require(amountIn > 0, "No token balance to convert");
@@ -25,7 +28,6 @@ contract Converter {
         IERC20(paymentToken).approve(sushiRouter, amountIn);
 
         address wrappedNativeCoin = IUniswapV2Router02(sushiRouter).WETH();
-        // address cptc = hub.getContractAddress(TOKEN_HUB_IDENTIFIER);
         address[] memory path;
 
         if (paymentToken == wrappedNativeCoin) {
@@ -51,6 +53,10 @@ contract Converter {
         emit TokenConverted(amounts);
     }
 
+    /**
+     * @dev It uses the sushi router (Uniswap interface though) to swap the native coin to CPTC.
+     * A transfer must be done prior to calling this function.
+     */
     function _convertNativeCurrency(address _cptc) internal {
         uint amountIn = address(this).balance;
         require(amountIn > 0, "No native currency balance to convert");

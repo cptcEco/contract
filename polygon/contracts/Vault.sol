@@ -25,6 +25,10 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter, MerkleDist
         factory = msg.sender;
     }
 
+    /**
+     * @dev Vault initializer function.
+     * This function can only be run once, and only by the factory (vault creator)
+     */
     function initialize(
         address _owner,
         address _cptcHub,
@@ -37,14 +41,17 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter, MerkleDist
     }
 
     /**
-     * @dev Transfers set amount of tokens to recipients
+     * @dev Transfers set amount of tokens to recipients. 
+     * This is an expensive function to use for a large amount of recipients, so it should be
+     * saved only for specific use cases where one wants to immediately transfer tokens to a 
+     * small set of addresses.
      */
     function dropTokens(address[] calldata _recipients, uint256[] calldata _amounts) external override onlyOwner {
         Airdrop._dropTokens(hub.getContractAddress(TOKEN_HUB_IDENTIFIER), _recipients, _amounts);
     }
 
     /**
-     * @dev Withdraws all funds from contract
+     * @dev Withdraws all funds from contract. Only its owner can use this.
      */
     function withdrawTokens(address _beneficiary) external onlyOwner override {
         IERC20 token = IERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
@@ -87,6 +94,10 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter, MerkleDist
         emit HubAddressModified(newHubAddress);
     }
 
+    /**
+     * @dev Destroys the Vault contract, transfering balance to owner (not token balances though).
+     * It can only be called by the factory (vault creator)
+     */
     function destroy() external override onlyFactory {
         selfdestruct(payable(owner()));
     }

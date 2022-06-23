@@ -56,6 +56,9 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         return Math.min(block.timestamp, periodFinish);
     }
 
+    /**
+     * @dev Rate of rewards per token staked, since last update time
+     */
     function rewardPerToken() override public view returns (uint256) {
         if (_totalSupply == 0) {
             return rewardPerTokenStored;
@@ -72,6 +75,9 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
+    /**
+     * @dev Stake with offchain signature (EIP2612) of SLP approval
+     */
     function stakeWithPermit(uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         _totalSupply = _totalSupply.add(amount);
@@ -85,6 +91,9 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         emit Staked(msg.sender, amount);
     }
 
+    /**
+     * @dev Stake a given approved amount of SLP tokens
+     */
     function stake(uint256 amount) override external nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         _totalSupply = _totalSupply.add(amount);
@@ -94,6 +103,9 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         emit Staked(msg.sender, amount);
     }
 
+    /**
+     * @dev Withdraws a given amount of staked SLP tokens
+     */
     function withdraw(uint256 amount) override public nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
         _totalSupply = _totalSupply.sub(amount);
@@ -103,6 +115,9 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         emit Withdrawn(msg.sender, amount);
     }
 
+    /**
+     * @dev Claims all entitled rewards
+     */
     function getReward() override public nonReentrant updateReward(msg.sender) {
         uint256 reward = rewards[msg.sender];
         if (reward > 0) {
@@ -113,6 +128,9 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
         }
     }
 
+    /**
+     * @dev Exits the market: withdraws all staked tokens and claims all current earnings
+     */
     function exit() override external {
         withdraw(_balances[msg.sender]);
         getReward();
@@ -120,6 +138,10 @@ contract StakingRewards is Ownable, IStakingRewards, ReentrancyGuard {
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
+    /**
+     * @dev Notifies StakingRewards that a given amount of reward tokens were transfered to this contract
+     * It recalculates the rewardRate and the finishing timestamp
+     */
     function notifyRewardAmount(uint256 reward, uint256 rewardsDuration) external onlyRewardsDistribution updateReward(address(0)) {
         require(block.timestamp.add(rewardsDuration) >= periodFinish, "Cannot reduce existing period");
 

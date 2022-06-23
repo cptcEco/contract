@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MerkleDistributor is Ownable {
+    // Contract may store more than one merkle root, each indexed to a groupId
     mapping(uint256 => bytes32) public merkleRoots;
 
     // This is a packed array of booleans.
@@ -17,6 +18,9 @@ contract MerkleDistributor is Ownable {
       merkleRoots[_groupId] = _merkleRoot;
     }
 
+    /**
+     * @dev Checks if leaf airdrop was already claimed
+     */
     function isClaimed(uint256 _groupId, uint256 _index) public view returns (bool) {
         uint256 claimedWordIndex = _index / 256;
         uint256 claimedBitIndex = _index % 256;

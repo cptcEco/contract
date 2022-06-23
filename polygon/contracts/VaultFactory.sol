@@ -38,6 +38,11 @@ contract VaultFactory is Ownable {
         emit HubAddressModified(newHubAddress);
     }
 
+    /**
+     * @dev Creates a new vault contract using opcode create2.
+     * The vault should be linked to the address of an nft collection.
+     * Msg.sender becomes the owner of the vault.
+     */
     function createVault(address collection, address paymentToken) external returns (address vault) {
         require(collectionToVault[collection] == address(0), "Collection already has vault");
         
@@ -54,6 +59,10 @@ contract VaultFactory is Ownable {
         emit VaultCreated(msg.sender, vault, collection, paymentToken);
     }
 
+    /**
+     * @dev Deletes vault code. Only the owner can call this function, and the selfdestruct of the vault
+     * can only be called by this factory, through this method.
+     */
     function deleteVault(address vault) external onlyVaultOwner(vault) {
         ownerToVaults[msg.sender].remove(vault);
         address collection = vaultToCollection[vault];
@@ -85,6 +94,10 @@ contract VaultFactory is Ownable {
         return ownerToVaults[owner].values();
     }
 
+    /**
+     * @dev Gets two lists, one with the owner's vault addresses and the other with
+     * the corresponding collection addresses. This means getVaultCollection(vaults[0]) == collections[0]
+     */
     function getOwnerVaultCollectionPairs(address owner) external view returns (address[] memory, address[] memory) {
         address[] memory vaults = ownerToVaults[owner].values();
         uint256 length = vaults.length;

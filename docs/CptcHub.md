@@ -10,4 +10,5 @@ The following business rules apply:
 
 
 ### Functionalities 
-TBD, currently self-explaining.
+The hub contract is used as a directory of other contract addresses present in the cptc ecosystem. Other contracts should have access to the hub and use it to access other contract addresses. E.g.: the StakingRewards contract will call the CptcHub contract to ask for the CptcToken contract address.
+This way, one can easily replace a contract in the ecosystem with a new version. Owner will just have to change the address of the corresponding contract on the hub directory. 
