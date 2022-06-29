@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "./CptcHub.sol";
 import "./Vault.sol";
-import "./interfaces/IVault.sol";
 
 contract VaultFactory is Ownable {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -49,7 +48,7 @@ contract VaultFactory is Ownable {
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, cptcHub, sushiRouter, paymentToken));
         vault = Create2.deploy(0, salt, type(Vault).creationCode);
         
-        IVault(vault).initialize(msg.sender, cptcHub, sushiRouter, paymentToken);
+        Vault(payable(vault)).initialize(msg.sender, cptcHub, sushiRouter, paymentToken);
 
         owners.add(msg.sender);
         ownerToVaults[msg.sender].add(vault);
@@ -73,7 +72,7 @@ contract VaultFactory is Ownable {
             owners.remove(msg.sender);
         }
 
-        IVault(vault).destroy();
+        Vault(payable(vault)).destroy();
         
         emit VaultDeleted(msg.sender, vault, collection);
     }
