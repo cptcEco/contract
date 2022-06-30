@@ -36,4 +36,13 @@ abstract contract MintableWithNative is Mintable {
             _safeMint(_msgSender(), tokenId);
         }
     }
+
+    function _mintInternal(address recipient, uint256 count) internal {
+        uint256 tokenId;
+        for (uint i = 0; i < count; i++) {
+            tokenId = _tokenIdCounter.current();
+            _tokenIdCounter.increment();
+            _safeMint(recipient, tokenId);
+        }
+    }
 }

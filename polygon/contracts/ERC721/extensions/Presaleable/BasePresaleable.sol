@@ -3,21 +3,13 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./Whitelistable.sol";
+import "../Whitelistable.sol";
 
-abstract contract Presaleable is Ownable, Whitelistable, ERC721Enumerable {
-    bool private preSaleInProgress;
-    uint256 private preSaleTokenPrice;
-    uint256 private preSaleLimitPerUser;
-    uint256 private preSaleTokenAmount;
-    constructor (
-        uint256 _preSaleTokenPrice,
-        uint256 _preSaleLimitPerUser,
-        uint256 _preSaleTokenAmount
-    ){
-        preSaleTokenPrice = _preSaleTokenPrice;
-        preSaleLimitPerUser = _preSaleLimitPerUser;
-        preSaleTokenAmount = _preSaleTokenAmount;
+abstract contract BasePresaleable is Ownable, Whitelistable, ERC721Enumerable {
+    bool internal preSaleInProgress;
+    uint256 internal preSalePrice;
+    constructor(uint256 _preSalePrice){
+        preSalePrice = _preSalePrice;
     }
 
     modifier preSaleIsInProgress() {
@@ -25,20 +17,12 @@ abstract contract Presaleable is Ownable, Whitelistable, ERC721Enumerable {
         _ ;
     }
 
-    function setPreSaleLimitPerUser(uint256 limit) public onlyOwner {
-        preSaleLimitPerUser = limit;
-    }
-
     function setPreSalePrice(uint256 price) public onlyOwner {
-        preSaleTokenPrice = price;
+        preSalePrice = price;
     }
 
     function getPreSalePrice() view public returns (uint256) {
-        return preSaleTokenPrice;
-    }
-
-    function setPreSaleTokenAmount(uint256 amount) public onlyOwner {
-        preSaleTokenAmount = amount;
+        return preSalePrice;
     }
 
     function startPreSale() public onlyOwner {
@@ -49,7 +33,7 @@ abstract contract Presaleable is Ownable, Whitelistable, ERC721Enumerable {
         preSaleInProgress = false;
     }
 
-    function preSaleMint(address recipient, uint amount) public payable virtual;
+    function _preSaleMint(address recipient, uint amount) internal virtual;
 
     function supportsInterface(bytes4 interfaceId)
         public
