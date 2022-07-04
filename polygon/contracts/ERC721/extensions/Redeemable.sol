@@ -2,9 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract Redeemable is Ownable, ERC721URIStorage {
+    using Strings for uint256;
+
     mapping(uint256 => bool) private redeemed;
 
     bool private _redeemInProgress = false;
@@ -75,7 +78,7 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
         require(_exists(tokenId), "ERC721URIStorage: URI query for nonexistent token");
 
         if (redeemed[tokenId]) {
-            return string(abi.encodePacked(_redeemBaseURI(), tokenId));
+            return string(abi.encodePacked(_redeemBaseURI(), tokenId.toString()));
         }
 
         return super.tokenURI(tokenId);
