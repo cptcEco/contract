@@ -18,14 +18,13 @@ abstract contract RoyaltyConfigurator is Ownable, Withdrawable, ERC721Royalty {
     }
 
     function getDefaultRoyalty() external view returns (address receiver, uint256 royaltyFraction) {
-        uint256 royaltyAmount;
-        (receiver, royaltyAmount) = ERC721Royalty(address(this)).royaltyInfo(0, 1);  // The way to get default royalty
-        royaltyFraction = royaltyAmount * _feeDenominator();
+        (receiver, royaltyFraction) = ERC721Royalty(address(this)).royaltyInfo(type(uint).max, _feeDenominator());  // The way to get default royalty
     }
 
     function supportsInterface(bytes4 interfaceId)
         public
         view
+        virtual
         override(ERC721, ERC721Royalty)
         returns (bool)
     {

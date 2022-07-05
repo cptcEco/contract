@@ -15,6 +15,11 @@ abstract contract Withdrawable is Ownable, ERC721 {
     mapping(address => uint) public withdrawAddressPercentages;
     address public defaultWithdrawAddress;
 
+    event Withdraw(address indexed token);
+    event SetDefaultAddress(address indexed newAddress);
+    event SetWithdrawAddress(address newAddress, uint percentage);
+    event RemoveWithdrawAddress(address removed);
+
     constructor(address _defaultWithdrawAddress) {
         defaultWithdrawAddress = _defaultWithdrawAddress;
     }
@@ -33,6 +38,8 @@ abstract contract Withdrawable is Ownable, ERC721 {
                 IERC20(token).transfer(defaultWithdrawAddress, afterBalance);
             }
         }
+
+        emit Withdraw(token);
     }
 
     function getWithdrawAddresses() external view returns (address[] memory) {
@@ -42,6 +49,7 @@ abstract contract Withdrawable is Ownable, ERC721 {
     function setDefaultWithdrawAddress(address newDefaultAddress) external onlyOwner {
         require(newDefaultAddress != address(0), "Withdraw address cannot be 0x00");
         defaultWithdrawAddress = newDefaultAddress;
+        emit SetDefaultAddress(newDefaultAddress);
     }
 
     function removeWithdrawAddress(address toRemove) external onlyOwner {
@@ -49,6 +57,7 @@ abstract contract Withdrawable is Ownable, ERC721 {
         require(withdrawAddresses.contains(toRemove), "Address not present");
         withdrawAddressPercentages[toRemove] = 0;
         withdrawAddresses.remove(toRemove);
+        emit RemoveWithdrawAddress(toRemove);
     }
 
     function setWithdrawAddress(address newAddress, uint percentage) external onlyOwner {
@@ -70,6 +79,8 @@ abstract contract Withdrawable is Ownable, ERC721 {
             withdrawAddresses.add(newAddress);
             withdrawAddressPercentages[newAddress] = percentage;
         }
+
+        emit SetWithdrawAddress(newAddress, percentage);
     }
 
     function getPercentageSum() internal view returns (uint sum) {

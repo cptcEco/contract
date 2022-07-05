@@ -38,6 +38,7 @@ abstract contract BasePresaleable is Ownable, Whitelistable, ERC721Enumerable {
     function supportsInterface(bytes4 interfaceId)
         public
         view
+        virtual
         override(ERC721, ERC721Enumerable)
         returns (bool)
     {
