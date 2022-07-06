@@ -26,7 +26,8 @@ abstract contract MintableWithERC20 is Mintable {
         setPrice(value);
     }
 
-    function mint(uint256 count) 
+    function mint(uint256 count)
+        virtual
         external 
         whenSaleInProgress
         mintNumberRestricted(count)
@@ -34,18 +35,15 @@ abstract contract MintableWithERC20 is Mintable {
     {
         uint256 amountAvailable = IERC20(currencyToken).allowance(_msgSender(), address(this));
         uint256 fullPrice = price.mul(count);
-        require(fullPrice >= amountAvailable, "Contract is not allowed to spent fullPrice");
+        require(amountAvailable >= fullPrice, "Contract is not allowed to spend fullPrice");
 
+        bool success = IERC20(currencyToken).transferFrom(_msgSender(), address(this), fullPrice);
+        require(success, "Was not able to transfer funds");
         _mintInternal(count);
     }
 
     function _mintInternal(uint256 count) internal override {
-        uint256 tokenId;
-        for (uint i = 0; i < count; i++) {
-            tokenId = _tokenIdCounter.current();
-            _tokenIdCounter.increment();
-            _safeMint(_msgSender(), tokenId);
-        }
+        _mintInternal(_msgSender(), count);
     }
 
     function _mintInternal(address recipient, uint256 count) internal {

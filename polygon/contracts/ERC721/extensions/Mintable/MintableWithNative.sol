@@ -18,6 +18,7 @@ abstract contract MintableWithNative is Mintable {
     }
 
     function mint(uint256 count)
+        virtual
         external
         payable
         whenSaleInProgress

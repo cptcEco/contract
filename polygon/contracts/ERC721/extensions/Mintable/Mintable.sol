@@ -9,8 +9,8 @@ abstract contract Mintable is Ownable, RoyaltyConfigurator {
     using Counters for Counters.Counter;
 
     uint256 public price;
-    uint256 public maxPerMint;
-    uint256 public maxMintsPerWallet;
+    uint256 public maxPerMint = 40;
+    uint256 public maxMintsPerWallet = 100;
 
     mapping(address => uint256) public mintsPerWallet;
 
