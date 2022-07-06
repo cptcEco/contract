@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../Whitelistable.sol";
 
 abstract contract BasePresaleable is Ownable, Whitelistable, ERC721Enumerable {
-    bool internal preSaleInProgress;
+    bool public preSaleInProgress;
     uint256 internal preSalePrice;
     constructor(uint256 _preSalePrice){
         preSalePrice = _preSalePrice;
@@ -14,6 +14,11 @@ abstract contract BasePresaleable is Ownable, Whitelistable, ERC721Enumerable {
 
     modifier preSaleIsInProgress() {
         require(preSaleInProgress, "Pre-sale not in progress");
+        _ ;
+    }
+
+    modifier preSaleNotInProgress() {
+        require(!preSaleInProgress, "Pre-sale in progress");
         _ ;
     }
 
@@ -25,11 +30,11 @@ abstract contract BasePresaleable is Ownable, Whitelistable, ERC721Enumerable {
         return preSalePrice;
     }
 
-    function startPreSale() public onlyOwner {
+    function startPreSale() public preSaleNotInProgress onlyOwner {
         preSaleInProgress = true;
     }
 
-    function endPreSale() public onlyOwner {
+    function stopPreSale() public preSaleIsInProgress onlyOwner {
         preSaleInProgress = false;
     }
 

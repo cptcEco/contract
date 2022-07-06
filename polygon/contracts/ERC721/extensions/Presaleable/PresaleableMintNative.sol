@@ -32,6 +32,7 @@ abstract contract PresaleableMintNative is BasePresaleable, MintableWithNative {
     }
 
     function preSaleMint(address recipient, uint amount)
+        virtual
         public
         payable
         preSaleIsInProgress

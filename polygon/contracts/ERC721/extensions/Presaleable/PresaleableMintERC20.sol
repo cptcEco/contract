@@ -32,14 +32,17 @@ abstract contract PresaleableMintERC20 is BasePresaleable, MintableWithERC20 {
     }
 
     function preSaleMint(address recipient, uint amount)
+        virtual
         public
         preSaleIsInProgress
         onlyWhitelisted(msg.sender)
     {
         uint256 amountAvailable = IERC20(currencyToken).allowance(_msgSender(), address(this));
-        uint256 fullPrice = price.mul(amount);
-        require(fullPrice >= amountAvailable, "Contract is not allowed to spent fullPrice");
+        uint256 fullPrice = preSalePrice.mul(amount);
+        require(fullPrice <= amountAvailable, "Contract is not allowed to spend fullPrice");
 
+        bool success = IERC20(currencyToken).transferFrom(_msgSender(), address(this), fullPrice);
+        require(success, "Was not able to transfer funds");
         _preSaleMint(recipient, amount);
     }
 
