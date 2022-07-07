@@ -12,7 +12,7 @@ abstract contract Droppable is Ownable, ERC721 {
 
     event Airdropped(address[] to);
 
-    function airdrop(address[] calldata to) external onlyOwner {
+    function airdrop(address[] calldata to) public onlyOwner {
         uint256 tokenId;
         for (uint i = 0; i < to.length; i++) {
             require(to[i] != address(0));

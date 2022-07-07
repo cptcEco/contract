@@ -13,8 +13,9 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
     bool private _redeemInProgress = false;
     string private _redeemedBaseURI;
 
-    event RedeemStopped(address account);
-    event RedeemStarted(address account);
+    event RedeemStopped(address indexed account);
+    event RedeemStarted(address indexed account);
+    event Redeemed(address indexed account, uint256 tokenId);
 
     modifier whenRedeemInProgress() {
         require(redeemInProgress(), "Redeem not in progress");
@@ -39,7 +40,7 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
      * @dev BaseURI pre-redeeming, should be overriden 
      */
     function _baseURI() internal pure virtual override returns (string memory) {
-        return "ipfs://override.me";
+        return "ipfs://override.me/";
     }
 
     function _redeemBaseURI() public view returns (string memory) {
@@ -55,7 +56,7 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
         emit RedeemStarted(_msgSender());
     }
 
-    function stopSale() external whenRedeemInProgress onlyOwner {
+    function stopRedeem() external whenRedeemInProgress onlyOwner {
         _redeemInProgress = false;
         emit RedeemStopped(_msgSender());
     }
@@ -72,6 +73,7 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
     {
         require(ownerOf(tokenId) == _msgSender(), "Not owner of token");
         redeemed[tokenId] = true;
+        emit Redeemed(_msgSender(), tokenId);
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
