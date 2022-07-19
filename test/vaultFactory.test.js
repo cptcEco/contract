@@ -1,13 +1,11 @@
 const ethers = require('ethers');
-const { expect, assert, use } = require('chai');
+const { expect, use } = require('chai');
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 const { solidity } = require('ethereum-waffle');
 const constants = require('../constants.json');
-const { toUnit } = require('./utils/encoders')
 const {
 	takeSnapshot, 
 	restoreSnapshot,
-    mineBlock
 } = require('./utils/helpers');
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 

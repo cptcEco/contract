@@ -9,4 +9,4 @@ See the [docs](docs/index.md) for more information.
 | Polygon Mumbai   | Hub Contract                | 0xace95320F30cd2652A26Ef58132F5c4321d4eE46 |
 | Polygon Mumbai   | Token Contract              | 0xe32E112aeA7a48992344c472889e1045dcB95551 |
 | Polygon Mumbai   | StakingRewards Contract     | 0xdB9C00E43199d07bf689F9ccCAD154955Fb7BD19 |
-| Polygon Mumbai   | VaultFactory Cotnract       | 0x81e89195f71f27939c1B01A97804b80343A0E02F |
+| Polygon Mumbai   | VaultFactory Contract       | 0x81e89195f71f27939c1B01A97804b80343A0E02F |

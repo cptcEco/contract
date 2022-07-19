@@ -1,4 +1,4 @@
-require('dotenv').config({ path: `${__dirname}/../.env` });
+require('dotenv').config({ path: `${__dirname}/.env` });
 // // eslint-disable-next-line import/no-extraneous-dependencies
 var HDWalletProvider = require('@truffle/hdwallet-provider');
 

@@ -1,18 +1,14 @@
-const BN = require('bn.js');
 const { assert } = require('chai');
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 
 var CptcHub = artifacts.require('CptcHub');
-var CptcToken = artifacts.require('CptcToken');
 
 var hub;
-var token;
 
 contract('Hub contract testing', async (accounts) => {
     before(async () => {
         // Get contracts used in hook
         hub = await CptcHub.deployed();
-        token = await CptcToken.deployed();
     });
 
     it('Owner is allowed to call set contract address', async () => {

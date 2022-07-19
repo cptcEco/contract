@@ -1,4 +1,4 @@
-require('dotenv').config({ path: `${__dirname}/../../.env` });
+require('dotenv').config({ path: `${__dirname}/../.env` });
 
 const CptcToken = artifacts.require('CptcToken');
 const CptcHub = artifacts.require('CptcHub');

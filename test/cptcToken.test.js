@@ -1,4 +1,3 @@
-const BN = require('bn.js');
 const { assert } = require('chai');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 const { signERC2612Permit } = require('eth-permit');
