@@ -34,7 +34,7 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter, MerkleDist
         address _cptcHub,
         address _sushiRouter,
         address _paymentToken
-    ) external onlyFactory initializer override {
+    ) external onlyFactory initializer {
         hub = CptcHub(_cptcHub);
         transferOwnership(_owner);
         Converter._initialize(_sushiRouter, _paymentToken);
@@ -98,7 +98,7 @@ contract Vault is IVault, Ownable, Initializable, Airdrop, Converter, MerkleDist
      * @dev Destroys the Vault contract, transfering balance to owner (not token balances though).
      * It can only be called by the factory (vault creator)
      */
-    function destroy() external override onlyFactory {
+    function destroy() external onlyFactory {
         selfdestruct(payable(owner()));
     }
 }
