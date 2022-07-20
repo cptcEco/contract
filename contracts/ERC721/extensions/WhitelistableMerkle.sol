@@ -13,11 +13,20 @@ abstract contract WhitelistableMerkle is ERC721 {
         merkleRoot = _merkleRoot;
     }
 
-    function mint(bytes32[] calldata merkleProof) public payable {
+    modifier onlyWhitelisted(bytes32[] calldata proof) {
+        require(whitelisted(proof), "Only whitelisted accounts");
+        _;
+    }
+
+    function mint(bytes32[] calldata merkleProof) public payable virtual {
         require(claimed[msg.sender] == false, "already claimed");
         claimed[msg.sender] = true;
-        require(MerkleProof.verify(merkleProof, merkleRoot, keccak256(abi.encodePacked(msg.sender))), "invalid merkle proof");
+        require(whitelisted(merkleProof), "invalid merkle proof");
         nextTokenId++;
         _mint(msg.sender, nextTokenId);
+    }
+
+    function whitelisted(bytes32[] calldata proof) internal virtual returns (bool) {
+        return MerkleProof.verify(proof, merkleRoot, keccak256(abi.encodePacked(msg.sender)));
     }
 }

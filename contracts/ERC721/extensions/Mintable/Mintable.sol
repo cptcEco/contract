@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "../RoyaltyConfigurator.sol";
+import "../Withdrawable.sol";
 
-abstract contract Mintable is Ownable, RoyaltyConfigurator {
+abstract contract Mintable is Ownable, Withdrawable {
     using Counters for Counters.Counter;
 
     uint256 public price;

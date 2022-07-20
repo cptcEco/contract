@@ -13,7 +13,7 @@ abstract contract PresaleableMintERC20 is BasePresaleable, MintableWithERC20 {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(RoyaltyConfigurator, BasePresaleable)
+        override(ERC721, BasePresaleable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -25,10 +25,6 @@ abstract contract PresaleableMintERC20 is BasePresaleable, MintableWithERC20 {
         uint256 tokenId
     ) internal virtual override(BasePresaleable, ERC721) {
         BasePresaleable._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    function _burn(uint256 tokenId) internal virtual override(ERC721, RoyaltyConfigurator) {
-        RoyaltyConfigurator._burn(tokenId);
     }
 
     function preSaleMint(address recipient, uint amount)
