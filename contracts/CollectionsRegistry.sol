@@ -73,8 +73,8 @@ contract CollectionsRegistry is MarketeerManagement {
     //////////////////////////////////////////
 
     function addCategories(bytes32[] calldata _categories) external onlyAdmin {
-        bytes32[] memory categoriesAdded;
-        uint nextAddIndex = 0;
+        bytes32[] memory categoriesAdded = new bytes32[](_categories.length);
+        uint nextAddIndex;
 
         for (uint i = 0; i < _categories.length; i++) {
             require(_categories[i] != "", "Empty category");
