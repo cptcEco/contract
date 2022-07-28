@@ -130,7 +130,7 @@ contract('CollectionsRegistry contract testing', async (accounts) => {
         });
 
         it('should add new collection and call getters', async () => {
-            const receipt = registry.registerCollection(someCollections[0], maCategory, { from: accounts[0] });
+            const receipt = await registry.registerCollection(someCollections[0], maCategory, { from: accounts[0] });
             await expectEvent(receipt, 'CollectionRegistered');
             
             const category = await registry.getCollectionCategory(someCollections[0]);
@@ -138,9 +138,62 @@ contract('CollectionsRegistry contract testing', async (accounts) => {
 
             const collections = await registry.getAllCategoryCollections(maCategory);
             await expect(collections.length).to.eq(1);
-            await expect(collections[0]).to.eq(someCollections[0]);
+            await expect(collections[0].toLowerCase()).to.eq(someCollections[0]);
         });
 
-        
+        it('should not allow changing collection category by non marketeer', async () => {
+            await expectRevert.unspecified(registry.changeCollectionCategory(someCollections[0], otherCategory, { from: accounts[1] }));
+        });
+
+        it('should not allow changing collection category to invalid category', async () => {
+            await expectRevert.unspecified(
+                registry.changeCollectionCategory(someCollections[0], ethers.utils.formatBytes32String("Invalid Category"), { from: accounts[0] })
+            );
+        });
+
+        it('should not allow changing collection category of non registered collection', async () => {
+            await expectRevert.unspecified(
+                registry.changeCollectionCategory(someCollections[1], otherCategory, { from: accounts[0] })
+            );
+        });
+
+        it('should change collection category', async () => {
+            const receipt = await registry.changeCollectionCategory(someCollections[0], otherCategory, { from: accounts[0] });
+            await expectEvent(receipt, 'CollectionCategoryChanged');
+            
+            const category = await registry.getCollectionCategory(someCollections[0]);
+            await expect(category).to.eq(otherCategory);
+
+            const maCollections = await registry.getAllCategoryCollections(maCategory);
+            await expect(maCollections.length).to.eq(0);
+            
+            const otherCollections = await registry.getAllCategoryCollections(otherCategory);
+            await expect(otherCollections.length).to.eq(1);
+            await expect(otherCollections[0].toLowerCase()).to.eq(someCollections[0]);
+        });
+
+        it('should not allow unregistering collection by non marketeer', async () => {
+            await expectRevert.unspecified(registry.unregisterCollection(someCollections[0], { from: accounts[1] }));
+        });
+
+        it('should not allow unregistering non registered collection', async () => {
+            await expectRevert.unspecified(
+                registry.unregisterCollection(someCollections[1], { from: accounts[0] })
+            );
+        });
+
+        it('should unregister collection', async () => {
+            const receipt = await registry.unregisterCollection(someCollections[0], { from: accounts[0] });
+            await expectEvent(receipt, 'CollectionUnregistered');
+            
+            const category = await registry.getCollectionCategory(someCollections[0]);
+            await expect(category).to.eq(ethers.utils.formatBytes32String(""));
+
+            const maCollections = await registry.getAllCategoryCollections(maCategory);
+            await expect(maCollections.length).to.eq(0);
+            
+            const otherCollections = await registry.getAllCategoryCollections(otherCategory);
+            await expect(otherCollections.length).to.eq(0);
+        });
     });
 });
