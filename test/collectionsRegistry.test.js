@@ -10,14 +10,21 @@ const {
 const constants = require('../constants.json');
 
 const CollectionsRegistry = artifacts.require("CollectionsRegistry");
+const IERC20 = artifacts.require("@openzeppelin/contracts/token/ERC20/IERC20.sol");
+const CptcHub = artifacts.require('CptcHub');
 
 contract('CollectionsRegistry contract testing', async (accounts) => {
     const wealthyAddress = constants.liveWealthyAddress;
 
     let registry;
+    let cptc;
+    let cptcHub;
     let lastSnapshotId;
+
     before(async () => {
-        registry = await CollectionsRegistry.new(wealthyAddress);
+        cptcHub = await CptcHub.deployed();
+        registry = await CollectionsRegistry.new(wealthyAddress, cptcHub.address);
+        cptc = await IERC20.at(constants.liveTokenAddress);
         lastSnapshotId = await takeSnapshot(web3);
     });
 
@@ -194,6 +201,66 @@ contract('CollectionsRegistry contract testing', async (accounts) => {
             
             const otherCollections = await registry.getAllCategoryCollections(otherCategory);
             await expect(otherCollections.length).to.eq(0);
+        });
+    });
+
+    describe('Registration fee stuff', () => {
+        const maCategory = ethers.utils.formatBytes32String("Modern Art");
+        const someCollections = [
+            '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'.toLowerCase(),
+            '0xa39Fd6e51aad88F6F4ce6aB4427279cffFc11111'.toLowerCase()
+        ];
+
+        before(async () => {
+            // add marketeer
+            await registry.addMarketeer(accounts[0], { from: wealthyAddress });    
+        });
+
+        it('should not allow changing fee by non admin', async () => {
+            await expectRevert.unspecified(registry.changeRegistrationFee(10, { from: accounts[0] }));
+        });
+
+        it('should change fee and call getters', async () => {
+            const receipt = await registry.changeRegistrationFee(1000, { from: wealthyAddress });
+            await expectEvent(receipt, 'RegistrationFeeChanged');
+            
+            const fee = await registry.registrationFee();
+            await expect(fee.toString()).to.eq('1000');
+        });
+
+        it('should not allow marketeer to register collection without covering fee', async () => {
+            await expectRevert.unspecified(
+                registry.registerCollection(someCollections[0], maCategory, { from: accounts[0] })
+            );
+        });
+
+        it('should add new collection and call getters, covering fee', async () => {
+            await cptc.transfer(accounts[0], 10000, { from: wealthyAddress });
+            await cptc.approve(registry.address, 10000, { from: accounts[0] });
+
+            const receipt = await registry.registerCollection(someCollections[0], maCategory, { from: accounts[0] });
+            await expectEvent(receipt, 'CollectionRegistered');
+
+            await expect((await cptc.balanceOf(registry.address)).toString()).to.equal('1000');
+            await expect((await cptc.balanceOf(accounts[0])).toString()).to.equal('9000');
+            
+            const category = await registry.getCollectionCategory(someCollections[0]);
+            await expect(category).to.eq(maCategory);
+
+            const collections = await registry.getAllCategoryCollections(maCategory);
+            await expect(collections.length).to.eq(1);
+            await expect(collections[0].toLowerCase()).to.eq(someCollections[0]);
+        });
+
+        it('should not allow withdraw by non admin', async () => {
+            await expectRevert.unspecified(registry.withdraw({ from: accounts[0] }));
+        });
+
+        it('should withdraw', async () => {
+            const receipt = await registry.withdraw({ from: wealthyAddress });
+            await expectEvent(receipt, 'Withdrawal');
+
+            await expect((await cptc.balanceOf(registry.address)).toString()).to.equal('0');
         });
     });
 });

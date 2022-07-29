@@ -2,20 +2,29 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./MarketeerManagement.sol";
+import "./CptcHub.sol";
 
 contract CollectionsRegistry is MarketeerManagement {
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
+    string constant private TOKEN_HUB_IDENTIFIER = "TokenContract";
+
     EnumerableSet.Bytes32Set private categories;
     mapping(bytes32 => EnumerableSet.AddressSet) private categoryCollections;
     mapping(address => bytes32) private collectionCategory;
+
+    uint public registrationFee;
+    CptcHub public hub;
 
     ////////////////////////////////////////
     //////////////// EVENTS ////////////////
     ////////////////////////////////////////
 
+    event Withdrawal(address indexed admin, uint amount);
+    event RegistrationFeeChanged(uint newValue);
     event CategoryBulkAdded(bytes32[] categoryBulk);
     event CategoryAdded(bytes32 indexed category);
     event CategoryRemoved(bytes32 indexed category);
@@ -45,7 +54,9 @@ contract CollectionsRegistry is MarketeerManagement {
     ///////////////////////////////////////
     ///////////// CONSTRUCTOR /////////////
     ///////////////////////////////////////
-    constructor(address _admin) MarketeerManagement(_admin) {}
+    constructor(address _admin, address _ctpcHub) MarketeerManagement(_admin) {
+        hub = CptcHub(_ctpcHub);
+    }
 
     ///////////////////////////////////////
     //////////////// VIEWS ////////////////
@@ -71,6 +82,20 @@ contract CollectionsRegistry is MarketeerManagement {
     //////////////////////////////////////////
     ///////////// STATE CHANGERS /////////////
     //////////////////////////////////////////
+
+    function changeRegistrationFee(uint newValue) external onlyAdmin {
+        registrationFee = newValue;
+        emit RegistrationFeeChanged(newValue);
+    }
+
+    function withdraw() external onlyAdmin {
+        IERC20 token = IERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
+        uint balance = IERC20(token).balanceOf(address(this));
+        if (balance > 0) {
+            require(token.transfer(msg.sender, balance));
+            emit Withdrawal(msg.sender, balance);
+        }
+    }
 
     function addCategories(bytes32[] calldata _categories) external onlyAdmin {
         bytes32[] memory categoriesAdded = new bytes32[](_categories.length);
@@ -107,7 +132,10 @@ contract CollectionsRegistry is MarketeerManagement {
         categoryExists(_category)
     {
         require(collectionCategory[_collection] == "", "Collection already registered");
+
+        if (registrationFee > 0) { _collectFee(); }
         _registerCollection(_collection, _category);
+        
         emit CollectionRegistered(_category, _collection);
     }
 
@@ -141,5 +169,10 @@ contract CollectionsRegistry is MarketeerManagement {
     function _registerCollection(address _collection, bytes32 _category) internal {
         categoryCollections[_category].add(_collection);
         collectionCategory[_collection] = _category;
+    }
+
+    function _collectFee() internal {
+        IERC20 token = IERC20(hub.getContractAddress(TOKEN_HUB_IDENTIFIER));
+        require(token.transferFrom(msg.sender, address(this), registrationFee));
     }
 }
