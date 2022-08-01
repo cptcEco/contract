@@ -23,6 +23,7 @@ contract CollectionsRegistry is MarketeerManagement {
     //////////////// EVENTS ////////////////
     ////////////////////////////////////////
 
+    event HubAddressModified(address newHubAddress);
     event Withdrawal(address indexed admin, uint amount);
     event RegistrationFeeChanged(uint newValue);
     event CategoryBulkAdded(bytes32[] categoryBulk);
@@ -82,6 +83,11 @@ contract CollectionsRegistry is MarketeerManagement {
     //////////////////////////////////////////
     ///////////// STATE CHANGERS /////////////
     //////////////////////////////////////////
+
+    function setHubAddress(address newHubAddress) external onlyAdmin {
+        hub = CptcHub(newHubAddress);
+        emit HubAddressModified(newHubAddress);
+    }
 
     function changeRegistrationFee(uint newValue) external onlyAdmin {
         registrationFee = newValue;
