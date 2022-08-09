@@ -47,6 +47,7 @@ contract StorefrontArt is ERC721, MintableWithERC20, ERC721Enumerable, RoyaltyCo
         ERC721Royalty._burn(tokenId);
     }
 
+    
     function supportsInterface(bytes4 interfaceId)
         public
         view
