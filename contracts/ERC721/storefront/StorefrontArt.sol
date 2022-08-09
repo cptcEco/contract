@@ -10,16 +10,28 @@ import "../extensions/RoyaltyConfigurator.sol";
 import "../extensions/Withdrawable.sol";
 
 /// @custom:security-contact metaverse@culturalplaces.com
-contract ExampleStorefrontArt is ERC721, MintableWithERC20, ERC721Enumerable, RoyaltyConfigurator {
+contract StorefrontArt is ERC721, MintableWithERC20, ERC721Enumerable, RoyaltyConfigurator {
+    string private baseUri;
+    string private contractUri;
 
-    constructor(uint256 _price, address _defaultWithdrawAddress) 
-    ERC721("Example Storefront Art", "ESA")
-    MintableWithERC20(_price, 0x0a97853c72cB28C98B3112AE45215391675CAc43)
-    Withdrawable(_defaultWithdrawAddress)
-    {}
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 _price,
+        address _defaultWithdrawAddress,
+        string memory _baseUri,
+        string memory _contractUri
+    ) 
+        ERC721(_name, _symbol)
+        MintableWithERC20(_price, 0x0a97853c72cB28C98B3112AE45215391675CAc43)
+        Withdrawable(_defaultWithdrawAddress)
+    {
+        baseUri = _baseUri;
+        contractUri = _contractUri;
+    }
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "http://localhost";
+    function _baseURI() internal view override returns (string memory) {
+        return baseUri;
     }
 
     // The following functions are overrides required by Solidity.
@@ -45,6 +57,6 @@ contract ExampleStorefrontArt is ERC721, MintableWithERC20, ERC721Enumerable, Ro
     }
 
     function contractURI() public view returns (string memory) {
-        return "https://metadata-url.com/my-metadata";
+        return contractUri;
     }
 }

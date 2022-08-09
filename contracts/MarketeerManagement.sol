@@ -20,6 +20,10 @@ abstract contract MarketeerManagement is AccessControlEnumerable {
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
+    function isMarketeer(address _addr) external view returns (bool) {
+        return hasRole(MARKETEER_ROLE, _addr);
+    }
+
     function addMarketeer(address _marketeer) external {
         // Access to this function is being controlled on the grantRole level
         grantRole(MARKETEER_ROLE, _marketeer);
