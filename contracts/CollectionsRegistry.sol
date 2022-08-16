@@ -31,7 +31,7 @@ contract CollectionsRegistry is MarketeerManagement {
     event CategoryRemoved(bytes32 indexed category);
     event CollectionRegistered(bytes32 indexed category, address collection);
     event CollectionCategoryChanged(address indexed collection, bytes32 indexed oldCategory, bytes32 indexed newCategory);
-    event CollectionUnregistered(address collection);
+    event CollectionUnregistered(address indexed collection, bytes32 indexed category);
 
     //////////////////////////////////////
     ///////////// MODIFIERS //////////////
@@ -165,11 +165,11 @@ contract CollectionsRegistry is MarketeerManagement {
         validCollection(_collection)
     {
         bytes32 category = collectionCategory[_collection];
-        require(category != "", "Collection not registered");
+        require(category != "", "Category not registered");
         
         delete collectionCategory[_collection];
         categoryCollections[category].remove(_collection);
-        emit CollectionUnregistered(_collection);
+        emit CollectionUnregistered(_collection, category);
     }
 
     function _registerCollection(address _collection, bytes32 _category) internal {
