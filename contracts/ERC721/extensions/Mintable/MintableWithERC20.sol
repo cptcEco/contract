@@ -49,8 +49,8 @@ abstract contract MintableWithERC20 is Mintable {
     function _mintInternal(address recipient, uint256 count) internal {
         uint256 tokenId;
         for (uint i = 0; i < count; i++) {
-            tokenId = _tokenIdCounter.current();
             _tokenIdCounter.increment();
+            tokenId = _tokenIdCounter.current();            
             _safeMint(recipient, tokenId);
         }
     }
