@@ -15,6 +15,8 @@ contract CollectionsRegistry is MarketeerManagement {
     EnumerableSet.Bytes32Set private categories;
     mapping(bytes32 => EnumerableSet.AddressSet) private categoryCollections;
     mapping(address => bytes32) private collectionCategory;
+    mapping(address => address) private collectionMarketeer;
+    mapping(address => address[]) public marketeerCollection;
 
     uint public registrationFee;
     CptcHub public hub;
@@ -50,6 +52,10 @@ contract CollectionsRegistry is MarketeerManagement {
     modifier categoryExists(bytes32 _category) {
         require(categories.contains(_category), "Category inexistent");
         _;
+    }
+
+    modifier marketeerIsOwnerOfCollection(address _merketeer) {
+
     }
 
     ///////////////////////////////////////
@@ -116,7 +122,7 @@ contract CollectionsRegistry is MarketeerManagement {
             }
         }
 
-        emit CategoryBulkAdded(categoriesAdded);
+        emit CategoryBulkAdded(categoriesAdded, sender);
     }
 
     function addCategory(bytes32 _category) external onlyAdmin validCategory(_category) {
@@ -142,7 +148,7 @@ contract CollectionsRegistry is MarketeerManagement {
         if (registrationFee > 0) { _collectFee(); }
         _registerCollection(_collection, _category);
         
-        emit CollectionRegistered(_category, _collection);
+        emit CollectionRegistered(_category, _collection, sender);
     }
 
     function changeCollectionCategory(address _collection, bytes32 _newCategory)

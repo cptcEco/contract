@@ -39,8 +39,8 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
     /**
      * @dev BaseURI pre-redeeming, should be overriden 
      */
-    function _baseURI() internal pure virtual override returns (string memory) {
-        return "ipfs://override.me/";
+    function _baseURI() internal pure override returns (string memory) {
+        return "";
     }
 
     function _redeemBaseURI() public view returns (string memory) {
@@ -63,6 +63,10 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
 
     function isRedeemable(uint256 tokenId) external view returns (bool) {
         return !redeemed[tokenId];
+    }
+
+    function isRedeemed(uint256 tokenId) public view returns (bool) {
+        return redeemed[tokenId];
     }
 
     function redeem(uint256 tokenId)

@@ -1,0 +1,13 @@
+{
+    "name": "The Mumbai Redeemable test",
+    "description": "A collection of redemables for test. Deployed in Mumbai as an example collection.",
+    "image": "ipfs://QmWbJLVmEBHU9zfLCBM4VAuTyQRN5P6KBREPi24Bzpivba/1.png",
+    "external_link": "https://cptc-int.culturalplaces.com",
+    "banner": "ipfs://QmWbJLVmEBHU9zfLCBM4VAuTyQRN5P6KBREPi24Bzpivba/1.png",
+    "preview_urls": [
+      "ipfs://QmWbJLVmEBHU9zfLCBM4VAuTyQRN5P6KBREPi24Bzpivba/p1.png",
+      "ipfs://QmWbJLVmEBHU9zfLCBM4VAuTyQRN5P6KBREPi24Bzpivba/p2.png",
+      "ipfs://QmWbJLVmEBHU9zfLCBM4VAuTyQRN5P6KBREPi24Bzpivba/p3.png",
+      "ipfs://QmWbJLVmEBHU9zfLCBM4VAuTyQRN5P6KBREPi24Bzpivba/p4.png"
+    ]
+  }
