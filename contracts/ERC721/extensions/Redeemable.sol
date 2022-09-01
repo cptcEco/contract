@@ -39,7 +39,7 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
     /**
      * @dev BaseURI pre-redeeming, should be overriden 
      */
-    function _baseURI() internal pure override returns (string memory) {
+    function _baseURI() internal view virtual override returns (string memory) {
         return "";
     }
 

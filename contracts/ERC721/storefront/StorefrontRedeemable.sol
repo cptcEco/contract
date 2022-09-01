@@ -35,7 +35,7 @@ contract StorefrontRedeemable is ERC721, MintableWithERC20, ERC721Enumerable, Ro
         contractUri = _contractUri;
     }
 
-    function _baseURI() internal pure override(ERC721, Redeemable) returns (string memory) {
+    function _baseURI() internal view override(ERC721, Redeemable) returns (string memory) {
         return baseUri;
     }
 
