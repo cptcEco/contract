@@ -31,9 +31,9 @@ contract CollectionsRegistry is MarketeerManagement {
     event CategoryBulkAdded(bytes32[] categoryBulk);
     event CategoryAdded(bytes32 indexed category);
     event CategoryRemoved(bytes32 indexed category);
-    event CollectionRegistered(bytes32 indexed category, address collection);
+    event CollectionRegistered(bytes32 indexed category, address collection, address marketeer);
     event CollectionCategoryChanged(address indexed collection, bytes32 indexed oldCategory, bytes32 indexed newCategory);
-    event CollectionUnregistered(address collection);
+    event CollectionUnregistered(address collection, bytes32 indexed category, address marketeer);
 
     //////////////////////////////////////
     ///////////// MODIFIERS //////////////
@@ -87,7 +87,7 @@ contract CollectionsRegistry is MarketeerManagement {
         return categoryCollections[category].values();
     }
 
-    function getCollectionForMarketeer(address _marketeer) external view onlyMarketeer returns (address[] memory) {
+    function getCollectionForMarketeer(address _marketeer) external view returns (address[] memory) {
         return marketeerCollections[_marketeer].values();
     }
 
@@ -156,7 +156,7 @@ contract CollectionsRegistry is MarketeerManagement {
         collectionMarketeer[_collection] = msg.sender;
         marketeerCollections[msg.sender].add(_collection);
 
-        emit CollectionRegistered(_category, _collection);
+        emit CollectionRegistered(_category, _collection, msg.sender);
     }
 
     function changeCollectionCategory(address _collection, bytes32 _newCategory)
@@ -187,7 +187,7 @@ contract CollectionsRegistry is MarketeerManagement {
         categoryCollections[category].remove(_collection);
         collectionMarketeer[_collection] = address(0);
         marketeerCollections[msg.sender].remove(_collection);
-        emit CollectionUnregistered(_collection);
+        emit CollectionUnregistered(_collection, category, msg.sender);
     }
 
     function _registerCollection(address _collection, bytes32 _category) internal {

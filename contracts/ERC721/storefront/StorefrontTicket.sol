@@ -18,12 +18,12 @@ contract StorefrontTicket is ERC721, MintableWithERC20, ERC721Enumerable, Royalt
 
     struct TokenDetails { // Struct
         bool refunded;
-        uint256 price;
         uint256 createdTimestamp;
     }
     //refund
     uint256 refundPeriod;
     uint256 refundFee;
+    uint availableForWithdrawal = 0;
     mapping(uint256 => TokenDetails) private tokenIdTokenDetails;
 
     constructor(
@@ -88,9 +88,12 @@ contract StorefrontTicket is ERC721, MintableWithERC20, ERC721Enumerable, Royalt
 
     function mint(uint256 count)
         virtual
-        external override {
-            super.mint(count);
+        public 
+        override 
+    {
+        super.mint(count);
         // add minted token information to tokenIdTokenDetails mapping
+        tokenIdTokenDetails[Counters.current(_tokenIdCounter) - 1] = TokenDetails(false, block.number);
     }
 
     function refund(uint256 tokenId) public {
@@ -108,6 +111,47 @@ contract StorefrontTicket is ERC721, MintableWithERC20, ERC721Enumerable, Royalt
         _burn(tokenId);
         // send tokens back to the user :token price - fee
         IERC20(currencyToken).transferFrom(address(this), _msgSender(), price - refundFee);
+        availableForWithdrawal += refundFee;
+    }
+
+    function setPrice(uint256 value) public override onlyOwner whenSaleNotInProgress {
+        super.setPrice(value);
+    }
+
+    function setPrice(uint256 value, address token) public override onlyOwner whenSaleNotInProgress {
+        super.setPrice(value, token);
+    }
+
+    function redeem(uint256 tokenId)
+        public
+        virtual
+        override
+        whenRedeemInProgress
+        tokenNotRedeemed(tokenId)
+    {
+        super.redeem(tokenId);
+        availableForWithdrawal += price;
+    }
+
+    function withdraw(address token) public virtual override {
+        uint startBalance = IERC20(token).balanceOf(address(this));
+        require(startBalance > 0, "Token balance is 0");
+        require(availableForWithdrawal > 0, "Available for withdrawal is 0");
+        address[] memory withdrawAddresses = super.getWithdrawAddresses();
+        for (uint8 i = 0; i < withdrawAddresses.length; i++) {
+            address withdrawAddress = withdrawAddresses[i];
+            IERC20(token).transfer(withdrawAddress, availableForWithdrawal * withdrawAddressPercentages[withdrawAddress]/100);
+        }
+
+        if (defaultWithdrawAddress != address(0)) {
+            uint afterBalance = IERC20(token).balanceOf(address(this));
+            uint leftover = availableForWithdrawal - (startBalance - afterBalance);
+            if (leftover != 0) {
+                IERC20(token).transfer(defaultWithdrawAddress, leftover);
+            }
+        }
+        availableForWithdrawal = 0;
+        emit Withdraw(token);
     }
 
 }

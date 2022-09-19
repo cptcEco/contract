@@ -70,7 +70,7 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
     }
 
     function redeem(uint256 tokenId)
-        external
+        public
         virtual
         whenRedeemInProgress
         tokenNotRedeemed(tokenId)
