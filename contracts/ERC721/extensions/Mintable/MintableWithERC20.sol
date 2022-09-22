@@ -17,11 +17,11 @@ abstract contract MintableWithERC20 is Mintable {
         currencyToken = _currencyToken;
     }
 
-    function setPrice(uint256 value) public override onlyOwner {
+    function setPrice(uint256 value) virtual public override onlyOwner {
         price = value;
     }
 
-    function setPrice(uint256 value, address token) public onlyOwner {
+    function setPrice(uint256 value, address token) virtual public onlyOwner {
         currencyToken = token;
         setPrice(value);
     }
