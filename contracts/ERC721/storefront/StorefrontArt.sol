@@ -19,11 +19,12 @@ contract StorefrontArt is ERC721, MintableWithERC20, ERC721Enumerable, RoyaltyCo
         string memory _symbol,
         uint256 _price,
         address _defaultWithdrawAddress,
+        address _tokenContractAddress,
         string memory _baseUri,
         string memory _contractUri
     ) 
         ERC721(_name, _symbol)
-        MintableWithERC20(_price, 0x0a97853c72cB28C98B3112AE45215391675CAc43)
+        MintableWithERC20(_price, _tokenContractAddress)
         Withdrawable(_defaultWithdrawAddress)
     {
         baseUri = _baseUri;
