@@ -181,7 +181,7 @@ contract CollectionsRegistry is MarketeerManagement {
         validCollection(_collection)
     {
         bytes32 category = collectionCategory[_collection];
-        require(category != "", "Collection not registered");
+        require(category != "", "Category not registered");
         
         delete collectionCategory[_collection];
         categoryCollections[category].remove(_collection);
