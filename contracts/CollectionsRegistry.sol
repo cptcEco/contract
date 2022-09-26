@@ -15,6 +15,8 @@ contract CollectionsRegistry is MarketeerManagement {
     EnumerableSet.Bytes32Set private categories;
     mapping(bytes32 => EnumerableSet.AddressSet) private categoryCollections;
     mapping(address => bytes32) private collectionCategory;
+    mapping(address => address) private collectionMarketeer;
+    mapping(address => EnumerableSet.AddressSet) private marketeerCollections;
 
     uint public registrationFee;
     CptcHub public hub;
@@ -29,9 +31,9 @@ contract CollectionsRegistry is MarketeerManagement {
     event CategoryBulkAdded(bytes32[] categoryBulk);
     event CategoryAdded(bytes32 indexed category);
     event CategoryRemoved(bytes32 indexed category);
-    event CollectionRegistered(bytes32 indexed category, address collection);
+    event CollectionRegistered(bytes32 indexed category, address collection, address marketeer);
     event CollectionCategoryChanged(address indexed collection, bytes32 indexed oldCategory, bytes32 indexed newCategory);
-    event CollectionUnregistered(address indexed collection, bytes32 indexed category);
+    event CollectionUnregistered(address collection, bytes32 indexed category, address marketeer);
 
     //////////////////////////////////////
     ///////////// MODIFIERS //////////////
@@ -49,6 +51,11 @@ contract CollectionsRegistry is MarketeerManagement {
 
     modifier categoryExists(bytes32 _category) {
         require(categories.contains(_category), "Category inexistent");
+        _;
+    }
+
+    modifier marketeerIsOwnerOfCollection(address _marketeer, address _collection) {
+        require(collectionMarketeer[_collection] == _marketeer, "Marketeer not owner");
         _;
     }
 
@@ -78,6 +85,10 @@ contract CollectionsRegistry is MarketeerManagement {
 
     function getAllCategoryCollections(bytes32 category) external view returns (address[] memory) {
         return categoryCollections[category].values();
+    }
+
+    function getCollectionForMarketeer(address _marketeer) external view returns (address[] memory) {
+        return marketeerCollections[_marketeer].values();
     }
 
     //////////////////////////////////////////
@@ -142,12 +153,16 @@ contract CollectionsRegistry is MarketeerManagement {
         if (registrationFee > 0) { _collectFee(); }
         _registerCollection(_collection, _category);
         
-        emit CollectionRegistered(_category, _collection);
+        collectionMarketeer[_collection] = msg.sender;
+        marketeerCollections[msg.sender].add(_collection);
+
+        emit CollectionRegistered(_category, _collection, msg.sender);
     }
 
     function changeCollectionCategory(address _collection, bytes32 _newCategory)
         external 
-        onlyMarketeer 
+        onlyMarketeer
+        marketeerIsOwnerOfCollection(msg.sender, _collection) 
         validCollection(_collection)
         categoryExists(_newCategory)
     {
@@ -162,6 +177,7 @@ contract CollectionsRegistry is MarketeerManagement {
     function unregisterCollection(address _collection)
         external
         onlyMarketeer
+        marketeerIsOwnerOfCollection(msg.sender, _collection) 
         validCollection(_collection)
     {
         bytes32 category = collectionCategory[_collection];
@@ -169,7 +185,9 @@ contract CollectionsRegistry is MarketeerManagement {
         
         delete collectionCategory[_collection];
         categoryCollections[category].remove(_collection);
-        emit CollectionUnregistered(_collection, category);
+        collectionMarketeer[_collection] = address(0);
+        marketeerCollections[msg.sender].remove(_collection);
+        emit CollectionUnregistered(_collection, category, msg.sender);
     }
 
     function _registerCollection(address _collection, bytes32 _category) internal {

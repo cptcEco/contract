@@ -17,18 +17,18 @@ abstract contract MintableWithERC20 is Mintable {
         currencyToken = _currencyToken;
     }
 
-    function setPrice(uint256 value) public override onlyOwner {
+    function setPrice(uint256 value) virtual public override onlyOwner {
         price = value;
     }
 
-    function setPrice(uint256 value, address token) public onlyOwner {
+    function setPrice(uint256 value, address token) virtual public onlyOwner {
         currencyToken = token;
         setPrice(value);
     }
 
     function mint(uint256 count)
         virtual
-        external 
+        public 
         whenSaleInProgress
         mintNumberRestricted(count)
         mintsPerWalletRestricted(_msgSender(), count)
@@ -49,8 +49,8 @@ abstract contract MintableWithERC20 is Mintable {
     function _mintInternal(address recipient, uint256 count) internal {
         uint256 tokenId;
         for (uint i = 0; i < count; i++) {
-            tokenId = _tokenIdCounter.current();
-            _tokenIdCounter.increment();
+            tokenId = _tokenIdCounter.current();  
+            _tokenIdCounter.increment();       
             _safeMint(recipient, tokenId);
         }
     }
