@@ -8,6 +8,7 @@
     "truffle:test:polygon": "truffle test --network test ./test/collectionsRegistry.test.js",
     "truffle:deploy:mumbai": "truffle migrate --network mumbai --reset",
     "truffle:deploy:live": "truffle migrate --network live",
+    "truffle:deploy:collections": "truffle migrate --network collections --reset",
     "ganache": "ganache-cli --fork https://polygon-mainnet.g.alchemy.com/v2/0mIzYeWBV_FjHlr5FzDfnzDwFiWFN0-d@28462861 --unlock 0x3556e77f33dfd3c07dff3da4c5c26eaaf92feab7 --unlock 0x8832924854e3cedb0a6abf372e6ccff9f7654332 -i 999 -p 7545 -l 100000000 -a 30 -m \"aspect ask story desert profit engage tuition leave fade giraffe exclude brief\""
   },
   "dependencies": {
