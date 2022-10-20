@@ -61,4 +61,12 @@ contract StorefrontArt is ERC721, MintableWithERC20, ERC721Enumerable, RoyaltyCo
     function contractURI() public view returns (string memory) {
         return contractUri;
     }
+
+    function updateBaseUri(string memory _baseUri) external onlyOwner {
+        baseUri = _baseUri;
+    } 
+
+    function updateContractUri(string memory _contractUri) external onlyOwner {
+        contractUri = _contractUri;
+    } 
 }

@@ -77,4 +77,12 @@ contract StorefrontMedia is ERC721, MintableWithERC20, ERC721Enumerable, Royalty
         string memory baseURI = _baseURI();
         return bytes(baseURI).length > 0 ? baseURI : "";
     }
+
+    function updateBaseUri(string memory _baseUri) external onlyOwner {
+        baseUri = _baseUri;
+    } 
+
+    function updateContractUri(string memory _contractUri) external onlyOwner {
+        contractUri = _contractUri;
+    } 
 }
