@@ -89,4 +89,8 @@ abstract contract Redeemable is Ownable, ERC721URIStorage {
 
         return super.tokenURI(tokenId);
     }
+
+    function updateRedeemedBaseURI (string memory _baseUriPostRedeem) external onlyOwner {
+        _redeemedBaseURI = _baseUriPostRedeem;
+    }
 }
