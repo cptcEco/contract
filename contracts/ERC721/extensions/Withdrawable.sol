@@ -42,7 +42,7 @@ abstract contract Withdrawable is Ownable, ERC721 {
         emit Withdraw(token);
     }
 
-    function getWithdrawAddresses() external view returns (address[] memory) {
+    function getWithdrawAddresses() public view returns (address[] memory) {
         return withdrawAddresses.values();
     }
 

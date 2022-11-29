@@ -1,0 +1,13 @@
+{
+    "name": "The Mumbai Redeemable test #2",
+    "description": "A collection of redemables for test. Deployed in Mumbai as an example collection.",
+    "image": "ipfs://QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn/2.png",
+    "dna": "585a73b4abeef8cf523999805ef62a412460a4ce",
+    "edition": 1,
+    "date": 1660291360286,
+    "creator": "Djordje Kovacevic",
+    "license": "CC BY-NC-ND (https://creativecommons.org/licenses/by-nc-nd/4.0/)",
+    "banner": "banner.png",
+    "preview_urls": [],
+    "compiler": "HashLips Art Engine"
+  }
